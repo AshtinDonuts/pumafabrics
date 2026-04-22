@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import importlib
 from pumafabrics.tamed_puma.nullspace_control.nullspace_controller import CartesianImpedanceController
@@ -41,9 +42,6 @@ class PUMAControl():
         return xddot_pos_quat
 
     def initialize_PUMA(self, q_init, goal_pos, offset_orientation):
-        # # Construct classes:
-        results_base_directory = '../pumafabrics/puma_adapted/'
-
         # Parameters
         if self.params["mode_NN"] == "1st":
             self.params_name = self.params["params_name_1st"]
@@ -51,11 +49,26 @@ class PUMAControl():
             self.params_name = self.params["params_name_2nd"]
         print("self.params_name:", self.params_name)
 
+        # Results are stored at repo-root: ./results/<params_name>/<primitive_id>/
+        # (e.g. /home/khw/pumafabrics/results/2nd_order_R3S3_tomato_31may/6/model)
+        # `puma_controller.py` lives in: <repo_root>/pumafabrics/tamed_puma/tamedpuma/
+        # so we need to go up 3 levels to reach <repo_root>.
+        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+        results_root = os.path.join(repo_root, "results")
+
         # Load parameters
         Params = getattr(importlib.import_module('pumafabrics.puma_adapted.params.' + self.params_name), 'Params')
-        params = Params(results_base_directory)
-        params.results_path += params.selected_primitives_ids + '/'
-        params.load_model = True
+        # Pass empty base; we'll override `results_path` explicitly to match disk layout.
+        params = Params(results_base_directory="")
+        params.results_path = os.path.join(
+            results_root,
+            self.params_name,
+            str(params.selected_primitives_ids),
+            "",
+        )
+
+        # Load weights only if they exist to avoid hard failures when artifacts are missing.
+        params.load_model = os.path.isfile(os.path.join(params.results_path, "model")) or params.load_model
 
         # Initialize framework
         learner, _, data = initialize_framework(params, self.params_name, verbose=False)

@@ -1,3 +1,4 @@
+import os
 import numpy as np
 
 from pumafabrics.puma_adapted.tools.animation import TrajectoryPlotter
@@ -77,7 +78,11 @@ class example_point_robot_PUMA():
         # Parameters
         params_name = '2nd_order_2D'
         x_t_init = np.array([np.append(ob['robot_0']["joint_state"]["position"][0:2], ob['robot_0']["joint_state"]["velocity"][0:2])]) # initial states
-        results_base_directory = '../pumafabrics/puma_adapted/'
+        # Resolve paths relative to the repository root so examples work
+        # regardless of the current working directory.
+        results_base_directory = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..')
+        ) + '/'
 
         # Load parameters
         Params = getattr(importlib.import_module('pumafabrics.puma_adapted.params.' + params_name), 'Params')

@@ -2,3 +2,6 @@
 __pycache__
 src/results/
 
+examples/images/
+puma_adapted/
+results/

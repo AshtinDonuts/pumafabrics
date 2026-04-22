@@ -18,6 +18,7 @@ For more videos and details, check out our [website](https://autonomousrobots.nl
 ## Installation:
 ### Install via poetry
 ```bash
+poetry lock
 poetry install
 poetry update
 ```
@@ -56,5 +57,3 @@ Be aware that we are continuing to work on this repository, for the original res
 
 ## Citation
 Like this work, please cite our paper via IN-PROGRESS. 
-
-
