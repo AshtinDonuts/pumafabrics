@@ -1,5 +1,5 @@
 import numpy as np
-from copy import deepcopy
+from copy import copy, deepcopy
 import gymnasium as gym
 from urdfenvs.urdf_common.urdf_env import UrdfEnv
 from urdfenvs.robots.generic_urdf import GenericUrdfReacher
