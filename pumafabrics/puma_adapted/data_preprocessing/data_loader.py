@@ -1,17 +1,30 @@
 from pumafabrics.puma_adapted.datasets.dataset_keys import LASA, LASA_S2, LAIR, ABB_R3S3, kuka, dingo_kinova
-from spatialmath import SO3, UnitQuaternion
 import os
 import pickle
 import numpy as np
 import scipy.io as sio
+from scipy.spatial.transform import Rotation as R
 import json
 import copy
+from typing import List
 
 
 def load_demonstrations(dataset_name, selected_primitives_ids, dim_manifold):
     """
     Loads demonstrations
     """
+    # Allow passing a direct on-disk directory instead of a named dataset.
+    # This is useful for external datasets that don't follow the internal
+    # `datasets/<dataset_name>/<primitive>/<demo>.pk` convention.
+    if _is_dataset_directory(dataset_name):
+        data_loader = _get_data_loader_for_directory(dim_manifold)
+        demonstrations, demonstrations_primitive_id, delta_t_eval = data_loader(dataset_name)
+        loaded_info = {'demonstrations raw': demonstrations,
+                       'demonstrations primitive id': demonstrations_primitive_id,
+                       'n primitives': len(np.unique(demonstrations_primitive_id)),
+                       'delta t eval': delta_t_eval}
+        return loaded_info
+
     # Get names of primitives in dataset
     dataset_primitives_names = get_dataset_primitives_names(dataset_name)
 
@@ -36,6 +49,135 @@ def load_demonstrations(dataset_name, selected_primitives_ids, dim_manifold):
                    'n primitives': n_primitives,
                    'delta t eval': delta_t_eval}
     return loaded_info
+
+
+def _is_dataset_directory(dataset_name: str) -> bool:
+    """
+    Returns True if `dataset_name` is actually a filesystem directory path.
+    """
+    if not isinstance(dataset_name, str):
+        return False
+    # Accept absolute paths and explicit relative paths, but also just check existence.
+    if os.path.isdir(dataset_name):
+        return True
+    if dataset_name.startswith('/') and os.path.isdir(dataset_name):
+        return True
+    if dataset_name.startswith('./') and os.path.isdir(dataset_name):
+        return True
+    if dataset_name.startswith('../') and os.path.isdir(dataset_name):
+        return True
+    return False
+
+
+def _get_data_loader_for_directory(dim_manifold):
+    """
+    Chooses an appropriate loader for a flat directory of demo pickle files.
+    """
+    if dim_manifold == 3:
+        return _load_R3_from_flat_dir
+    if dim_manifold == 6:
+        return _load_R3S3_from_flat_dir
+    raise ValueError(f"Unsupported dim_manifold={dim_manifold} for directory dataset.")
+
+
+def _sorted_demo_files(dataset_dir: str):
+    """
+    Lists demo files in a directory, sorted for determinism.
+    Accepts .pk/.pkl files.
+    """
+    files = []
+    for name in os.listdir(dataset_dir):
+        lower = name.lower()
+        if lower.endswith('.pk') or lower.endswith('.pkl'):
+            files.append(name)
+    files.sort()
+    return [os.path.join(dataset_dir, f) for f in files]
+
+
+def _rotmat_to_quat_wxyz(rot_mat: np.ndarray) -> np.ndarray:
+    """
+    Converts a 3x3 rotation matrix into a quaternion in (w, x, y, z) order.
+    SciPy uses (x, y, z, w); this swaps to (w, x, y, z) to match existing code.
+    """
+    quat_xyzw = R.from_matrix(rot_mat).as_quat()
+    return np.array([quat_xyzw[3], quat_xyzw[0], quat_xyzw[1], quat_xyzw[2]])
+
+
+def _quat_wxyz_to_scipy(quat_wxyz: np.ndarray) -> np.ndarray:
+    """
+    Converts (w, x, y, z) quaternion to SciPy (x, y, z, w) order.
+    """
+    return np.array([quat_wxyz[1], quat_wxyz[2], quat_wxyz[3], quat_wxyz[0]])
+
+
+def _relative_quat_to_last_wxyz(quats_wxyz: List[np.ndarray]) -> List[np.ndarray]:
+    """
+    Returns quaternions expressed relative to the last quaternion, in (w, x, y, z).
+    Equivalent to: q_rel_i = q_i * inv(q_last).
+    """
+    r_last = R.from_quat(_quat_wxyz_to_scipy(quats_wxyz[-1]))
+    r_last_inv = r_last.inv()
+    rel = []
+    for q in quats_wxyz:
+        r_i = R.from_quat(_quat_wxyz_to_scipy(q))
+        q_rel_xyzw = (r_i * r_last_inv).as_quat()
+        rel.append(np.array([q_rel_xyzw[3], q_rel_xyzw[0], q_rel_xyzw[1], q_rel_xyzw[2]]))
+    return rel
+
+
+def _load_R3S3_from_flat_dir(dataset_dir: str):
+    """
+    Loads demonstrations from a directory containing pickled dicts with keys:
+    - x_pos: list/array of positions
+    - x_rot: list/array of rotation matrices
+    - delta_t: 1D array of time deltas
+    """
+    demos, primitive_id, dt = [], [], []
+    for filename in _sorted_demo_files(dataset_dir):
+        with open(filename, 'rb') as file:
+            data = pickle.load(file)
+
+        prev_quat = None
+        quats = []
+        for numpy_rot_mat in data['x_rot']:
+            quat = _rotmat_to_quat_wxyz(numpy_rot_mat)
+            if prev_quat is None:
+                prev_quat = quat
+            dist_quats = np.linalg.norm(quat - prev_quat)
+            if dist_quats > 0.5:
+                quat *= -1
+            quats.append(quat)
+            prev_quat = quat
+
+        quats = _relative_quat_to_last_wxyz(quats)
+
+        positions = np.array(data['x_pos']) - np.array(data['x_pos'])[-1]
+        demo = np.concatenate([positions, quats], axis=1).T
+
+        demos.append(demo)
+        dt.append(data['delta_t'])
+        primitive_id.append(0)
+
+    return demos, np.array(primitive_id), dt
+
+
+def _load_R3_from_flat_dir(dataset_dir: str):
+    """
+    Loads 3D position demonstrations from a directory containing pickled dicts with keys:
+    - x_pos: list/array of positions
+    - delta_t: 1D array of time deltas
+    """
+    demos, primitive_id, dt = [], [], []
+    for filename in _sorted_demo_files(dataset_dir):
+        with open(filename, 'rb') as file:
+            data = pickle.load(file)
+
+        positions = np.array(data['x_pos']) - np.array(data['x_pos'])[-1]
+        demos.append(positions.T)
+        dt.append(data['delta_t'])
+        primitive_id.append(0)
+
+    return demos, np.array(primitive_id), dt
 
 
 def get_dataset_primitives_names(dataset_name):
@@ -191,7 +333,7 @@ def load_R3S3(dataset_dir, demonstrations_names):
             quats = []
             for numpy_rot_mat in data['x_rot']:
                 # Get quatenion array from data
-                quat = UnitQuaternion(SO3(numpy_rot_mat)).A
+                quat = _rotmat_to_quat_wxyz(numpy_rot_mat)
 
                 # Check if quaternion flip, and flip if necessary
                 if prev_quat is None:
@@ -207,8 +349,7 @@ def load_R3S3(dataset_dir, demonstrations_names):
                 prev_quat = quat
 
             # Set identity quat as goal
-            last_quat = UnitQuaternion(quats[-1])
-            quats = [(UnitQuaternion(quats[i]) / last_quat).A for i in range(len(quats))]
+            quats = _relative_quat_to_last_wxyz(quats)
 
             # Set zero as goal
             positions = np.array(data['x_pos']) - np.array(data['x_pos'])[-1]
