@@ -175,7 +175,7 @@ class DataPreprocessor:
         # Iterate through primitives
         goals = []
         for i in np.unique(primitive_ids):
-            ids_primitives = primitive_ids == i
+            ids_primitives = (primitive_ids == i)
             demonstrations_primitive_ids = np.array(np.where(ids_primitives))[0]
             # Iterate through trajectories of each primitive
             goals_primitive = []

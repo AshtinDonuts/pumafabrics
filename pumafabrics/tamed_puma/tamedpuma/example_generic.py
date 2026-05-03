@@ -24,6 +24,7 @@ class ExampleGeneric:
             self.params["bool_combined"] = bool_combined
         if positions_obstacles is not None:
             self.params["positions_obstacles"] = positions_obstacles
+            self.params["nr_obst"] = len(positions_obstacles)
         if params_name_1st is not None:
             self.params["params_name_1st"] = params_name_1st
         if speed_obstacles is not None:

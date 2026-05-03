@@ -249,17 +249,18 @@ class trial_environments():
             variance=0.0
         )
         # Definition of the obstacle.
-        static_obst_dict = {
-            "type": "sphere",
-            # "geometry": {"position": positions_obstacles[0], "radius": 0.05},
-            "geometry": {"trajectory": [str(positions_obstacles[0][0]) + "+t*" + str(speed_obstacles[0][0]),
-                                        str(positions_obstacles[0][1]) + "+t*" + str(speed_obstacles[0][1]),
-                                        str(positions_obstacles[0][2]) + "+t*" + str(speed_obstacles[0][2])], "radius": 0.05},
-            "rgba": [1, 0, 0, 1]
-            # todo: IMPORTANT when z=0.5: fabrics becomes unstable/local minima
-        }
-        obst1 = DynamicSphereObstacle(name="staticObst", content_dict=static_obst_dict)
-        if nr_obst>1:
+        if nr_obst > 0:
+            static_obst_dict = {
+                "type": "sphere",
+                # "geometry": {"position": positions_obstacles[0], "radius": 0.05},
+                "geometry": {"trajectory": [str(positions_obstacles[0][0]) + "+t*" + str(speed_obstacles[0][0]),
+                                            str(positions_obstacles[0][1]) + "+t*" + str(speed_obstacles[0][1]),
+                                            str(positions_obstacles[0][2]) + "+t*" + str(speed_obstacles[0][2])], "radius": 0.05},
+                "rgba": [1, 0, 0, 1]
+                # todo: IMPORTANT when z=0.5: fabrics becomes unstable/local minima
+            }
+            obst1 = DynamicSphereObstacle(name="staticObst", content_dict=static_obst_dict)
+        if nr_obst > 1:
             static_obst_dict = {
                 "type": "sphere",
                 "geometry": {"position": positions_obstacles[1], "radius": 0.05},
@@ -489,17 +490,18 @@ class trial_environments():
             variance=0.0
         )
         # Definition of the obstacle.
-        static_obst_dict = {
-            "type": "sphere",
-            # "geometry": {"position": positions_obstacles[0], "radius": 0.05},
-            "geometry": {"trajectory": [str(positions_obstacles[0][0]) + "+t*" + str(speed_obstacles[0][0]),
-                                        str(positions_obstacles[0][1]) + "+t*" + str(speed_obstacles[0][1]),
-                                        str(positions_obstacles[0][2]) + "+t*" + str(speed_obstacles[0][2])], "radius": 0.05},
-            "rgba": [1, 0, 0, 1]
-            # todo: IMPORTANT when z=0.5: fabrics becomes unstable/local minima
-        }
-        obst1 = DynamicSphereObstacle(name="staticObst", content_dict=static_obst_dict)
-        if nr_obst>1:
+        if nr_obst > 0:
+            static_obst_dict = {
+                "type": "sphere",
+                # "geometry": {"position": positions_obstacles[0], "radius": 0.05},
+                "geometry": {"trajectory": [str(positions_obstacles[0][0]) + "+t*" + str(speed_obstacles[0][0]),
+                                            str(positions_obstacles[0][1]) + "+t*" + str(speed_obstacles[0][1]),
+                                            str(positions_obstacles[0][2]) + "+t*" + str(speed_obstacles[0][2])], "radius": 0.05},
+                "rgba": [1, 0, 0, 1]
+                # todo: IMPORTANT when z=0.5: fabrics becomes unstable/local minima
+            }
+            obst1 = DynamicSphereObstacle(name="staticObst", content_dict=static_obst_dict)
+        if nr_obst > 1:
             static_obst_dict = {
                 "type": "sphere",
                 "geometry": {"position": positions_obstacles[1], "radius": 0.05},

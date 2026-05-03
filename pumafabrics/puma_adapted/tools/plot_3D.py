@@ -1,3 +1,11 @@
+"""
+Example code use: 
+```
+python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/tools/plot_3D.py \
+/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/datasets/kuka/pick_tomato_31may/ee_state_0.pk
+```
+NOTE: Only one Dash App page can be launched at one time.
+"""
 import argparse
 import os
 import pickle
@@ -99,6 +107,7 @@ def main(argv: list[str]) -> int:
         default=None,
         help="Legacy mode: iteration number used to build the default training-pickle path.",
     )
+    parser.add_argument("--fix_axes_limits", action="store_true", help="Set axes limits to pre-defined values (defined within script.)")
     parser.add_argument("--debug", action="store_true", help="Print inferred format and keys to stderr.")
     parser.add_argument("--no-dash", action="store_true", help="Never start Dash (just open the figure).")
     args = parser.parse_args(argv)
@@ -132,7 +141,23 @@ def main(argv: list[str]) -> int:
         center=dict(x=0, y=0, z=0),
         up=dict(x=0, y=0, z=1),
     )
-    fig.update_layout(scene=dict(camera=camera))
+    if args.fix_axes_limits:
+        print('Using fixed axes limits')
+        fig.update_layout(
+            scene=dict(
+                camera=camera,
+                xaxis=dict(range=[0.0, 1.0]),
+                yaxis=dict(range=[-0.5, 0.5]),
+                zaxis=dict(range=[0.0, 0.8]),
+            )
+        )
+    else:
+        print("Using automatic axes limits")
+        fig.update_layout(
+        scene=dict(
+            camera=camera,
+        )
+    )
 
     fig.show()
 
