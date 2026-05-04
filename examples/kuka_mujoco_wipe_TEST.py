@@ -1,3 +1,6 @@
+"""
+Runs a PUMA on MuJoCo data trained policy
+"""
 import yaml
 import numpy as np
 from pumafabrics.tamed_puma.create_environment.environments import trial_environments

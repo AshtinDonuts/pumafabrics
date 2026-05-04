@@ -22,8 +22,10 @@ class EvaluateND(Evaluate):
 
         # Get time simulated trajectories
         delta_t_eval = np.mean(self.delta_t_eval[0])  # assumes delta is the same among demonstrations
-        time_simulations = np.repeat(np.arange(0, sim_results['visited states grid'].shape[0] * delta_t_eval, delta_t_eval).reshape(-1, 1),
-                                     self.density**self.dim_manifold, axis=1)
+        sim_len = sim_results['visited states grid'].shape[0]
+        # Avoid float arange off-by-one; guarantee time length == sim_len
+        time_1d = (np.arange(sim_len) * delta_t_eval).reshape(-1, 1)
+        time_simulations = np.repeat(time_1d, self.density**self.dim_manifold, axis=1)
 
         # Plot
         save_path = self.learner.save_path + 'images/' + 'primitive_%i_iter_%i' % (primitive_id, iteration) + '.pdf'
@@ -67,6 +69,10 @@ class EvaluateND(Evaluate):
 
         # Plot every joint simulated trajectories
         denorm_visited_states_grid = denormalize_state(sim_results['visited states grid'][:, :, :self.dim_space], self.x_min, self.x_max)
+        # Defensive alignment in case time vectors and state history differ by 1 due to upstream changes
+        T_grid = min(time_simulations.shape[0], denorm_visited_states_grid.shape[0])
+        time_simulations = time_simulations[:T_grid]
+        denorm_visited_states_grid = denorm_visited_states_grid[:T_grid]
         for i in range(n_joints):
             #axs[i].set_title('Joint' + ' ' + str(i + 1))
             axs[i].set_title(titles[i])
@@ -79,6 +85,8 @@ class EvaluateND(Evaluate):
 
         # Plot every joint demonstrations
         denorm_visited_states_demos = denormalize_state(sim_results['visited states demos'][:, :, :self.dim_space], self.x_min, self.x_max)
+        T_demos = min(time_simulations.shape[0], denorm_visited_states_demos.shape[0])
+        denorm_visited_states_demos = denorm_visited_states_demos[:T_demos]
         for i in range(n_joints):
             for j in range(self.n_trajectories):
                 if self.primitive_ids[j] == primitive_id:
@@ -88,7 +96,7 @@ class EvaluateND(Evaluate):
 
         for i in range(n_joints):
             for j in range(np.sum(self.primitive_ids == primitive_id)):
-                axs[i].plot(time_simulations, denorm_visited_states_demos[:, j, i], color='red', linestyle='-', linewidth=2.0)
+                axs[i].plot(time_simulations[:T_demos], denorm_visited_states_demos[:, j, i], color='red', linestyle='-', linewidth=2.0)
 
         fig.tight_layout()
 

@@ -1,0 +1,24 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: train.py (wipe_mujoco_kuka_simple, MPLBACKEND=AGG)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/pumafabrics/puma_adapted/train.py",
+            "args": ["--params", "wipe_mujoco_kuka_simple"],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "python.envFile": "${workspaceFolder}/.env",
+            "python": "${command:python.interpreterPath}",
+            "cwd": "${workspaceFolder}/pumafabrics/puma_adapted",
+            "env": {
+                "CONDA_DEFAULT_ENV": "pumafabrics",
+                "MPLBACKEND": "AGG"
+            }
+        }
+    ]
+}
