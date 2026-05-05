@@ -12,6 +12,7 @@ from pumafabrics.tamed_puma.tamedpuma.example_generic import ExampleGeneric
 import copy
 import time
 import pybullet
+import os
 """
 Example of KUKA iiwa 14 running TamedPUMA as a controller.
 """
@@ -21,7 +22,15 @@ class example_kuka_TamedPUMA(ExampleGeneric):
         self.IN_COLLISION = False
         self.time_to_goal = float("nan")
         self.solver_times = []
-        with open("../pumafabrics/tamed_puma/config/"+file_name+".yaml", "r") as setup_stream:
+        config_path = os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "pumafabrics",
+            "tamed_puma",
+            "config",
+            f"{file_name}.yaml",
+        )
+        with open(config_path, "r") as setup_stream:
             self.params = yaml.safe_load(setup_stream)
         self.network_yaml = file_name
         self.robot_name = self.params["robot_name"]
@@ -174,7 +183,6 @@ def main(render=True):  # True to render
         [0., 0., 0.] for _ in range(len(q_init_list))
     ]
     goal_vel_list[0] = [-0.01, 0., 0.]
-    # network_yaml = "1st_order_RSS3_sweep_16may" #
     network_yaml = "kuka_TamedPUMA_sweep" # TODO @user - modify to yaml file
     example_class = example_kuka_TamedPUMA(file_name=network_yaml)
     index = 0

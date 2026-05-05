@@ -49,12 +49,12 @@ class PUMAControl():
             self.params_name = self.params["params_name_2nd"]
         print("self.params_name:", self.params_name)
 
-        # Results are stored at repo-root: ./results/<params_name>/<primitive_id>/
-        # (e.g. /home/khw/pumafabrics/results/2nd_order_R3S3_tomato_31may/6/model)
+        # Results are stored under: ./pumafabrics/puma_adapted/results/<params_name>/<primitive_id>/
+        # (e.g. /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/results/1st_order_R3S3_sweep_16may/5/model)
         # `puma_controller.py` lives in: <repo_root>/pumafabrics/tamed_puma/tamedpuma/
         # so we need to go up 3 levels to reach <repo_root>.
         repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
-        results_root = os.path.join(repo_root, "results")
+        results_root = os.path.join(repo_root, "pumafabrics", "puma_adapted", "results")
 
         # Load parameters
         Params = getattr(importlib.import_module('pumafabrics.puma_adapted.params.' + self.params_name), 'Params')
@@ -67,8 +67,16 @@ class PUMAControl():
             "",
         )
 
-        # Load weights only if they exist to avoid hard failures when artifacts are missing.
-        params.load_model = os.path.isfile(os.path.join(params.results_path, "model")) or params.load_model
+        # Fail fast if checkpoint is missing (avoid running uninitialized networks).
+        model_path = os.path.join(params.results_path, "model")
+        if not os.path.isfile(model_path):
+            raise FileNotFoundError(
+                "TamedPUMA checkpoint not found; refusing to run with uninitialized weights.\n"
+                f"Expected checkpoint at: {model_path}\n"
+                "If you trained elsewhere, point the controller to the correct results directory "
+                "or place/symlink the `model` file at the expected path."
+            )
+        params.load_model = True
 
         # Initialize framework
         learner, _, data = initialize_framework(params, self.params_name, verbose=False)
