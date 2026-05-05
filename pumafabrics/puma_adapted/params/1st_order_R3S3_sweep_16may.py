@@ -6,7 +6,7 @@ import numpy as np
 class Params:
     """ General parameters """
     dataset_name: str = 'kuka'  # selects dataset, options: LASA, LAIR, optitrack, interpolation, joint_space, ABB_R3S3
-    results_path: str = 'results/1st_order_R3S3_place_16may/'
+    results_path: str = 'results/1st_order_R3S3_sweep_16may/'
     multi_motion: bool = False  # true when learning multiple motions together
     selected_primitives_ids: str = '5'  # id number from dataset_keys.py, e.g., '2' or '4,0,6'
     manifold_dimensions: int = 6  # dimensionality of the data manifold
@@ -34,7 +34,7 @@ class Params:
     """ Training """
     train: bool = True  # true when training
     load_model: bool = False # true to load previously trained model
-    max_iterations: int = 48000 #48000  # maximum number of training iterations
+    max_iterations: int = 48_000 #48000  # maximum number of training iterations
 
     """ Preprocessing """
     spline_sample_type: str = 'evenly spaced'  # resample from spline type, options: from data, evenly spaced

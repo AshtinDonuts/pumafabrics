@@ -49,7 +49,54 @@ def _pk_paths_in_folder(folder: str) -> list[str]:
     return paths
 
 
-def _add_object_traces(fig: "go.Figure", obj, trace_label: str, debug: bool) -> None:
+def _add_endpoint_spheres(
+    fig: "go.Figure",
+    *,
+    xs: list[float],
+    ys: list[float],
+    zs: list[float],
+    trace_label: str,
+    start_color: str,
+    end_color: str,
+    endpoint_size: float,
+) -> None:
+    if not xs:
+        return
+
+    fig.add_trace(
+        go.Scatter3d(
+            x=[xs[0]],
+            y=[ys[0]],
+            z=[zs[0]],
+            mode="markers",
+            marker=dict(size=endpoint_size, color=start_color, opacity=0.95),
+            name=f"{trace_label}_start",
+        )
+    )
+    if len(xs) > 1:
+        fig.add_trace(
+            go.Scatter3d(
+                x=[xs[-1]],
+                y=[ys[-1]],
+                z=[zs[-1]],
+                mode="markers",
+                marker=dict(size=endpoint_size, color=end_color, opacity=0.95),
+                name=f"{trace_label}_end",
+            )
+        )
+
+
+def _add_object_traces(
+    fig: "go.Figure",
+    obj,
+    trace_label: str,
+    debug: bool,
+    *,
+    highlight_endpoints: bool = True,
+    start_color: str = "#2ecc71",
+    end_color: str = "#e74c3c",
+    endpoint_size: float = 10.0,
+) -> None:
     """
     Append traces from one pickle object to an existing figure.
     See _make_figure_from_pickle for supported object shapes.
@@ -110,9 +157,28 @@ def _add_object_traces(fig: "go.Figure", obj, trace_label: str, debug: bool) -> 
             name=trace_label,
         )
     )
+    if highlight_endpoints:
+        _add_endpoint_spheres(
+            fig,
+            xs=xs,
+            ys=ys,
+            zs=zs,
+            trace_label=trace_label,
+            start_color=start_color,
+            end_color=end_color,
+            endpoint_size=endpoint_size,
+        )
 
 
-def _make_figure_from_pickles(paths: list[str], debug: bool) -> "go.Figure":
+def _make_figure_from_pickles(
+    paths: list[str],
+    debug: bool,
+    *,
+    highlight_endpoints: bool,
+    start_color: str,
+    end_color: str,
+    endpoint_size: float,
+) -> "go.Figure":
     """Load multiple .pk files and combine all trajectories/traces into one figure."""
     fig = go.Figure()
     for path in paths:
@@ -124,12 +190,29 @@ def _make_figure_from_pickles(paths: list[str], debug: bool) -> "go.Figure":
                 file=sys.stderr,
             )
         label = os.path.splitext(os.path.basename(path))[0]
-        _add_object_traces(fig, obj, label, debug)
+        _add_object_traces(
+            fig,
+            obj,
+            label,
+            debug,
+            highlight_endpoints=highlight_endpoints,
+            start_color=start_color,
+            end_color=end_color,
+            endpoint_size=endpoint_size,
+        )
     fig.update_layout(scene=dict(aspectmode="data"))
     return fig
 
 
-def _make_figure_from_pickle(obj, debug: bool) -> "go.Figure":
+def _make_figure_from_pickle(
+    obj,
+    debug: bool,
+    *,
+    highlight_endpoints: bool,
+    start_color: str,
+    end_color: str,
+    endpoint_size: float,
+) -> "go.Figure":
     """
     Supports:
     - training/eval plot pickles with a pre-built Plotly trace list at key `3D_plot`
@@ -141,7 +224,16 @@ def _make_figure_from_pickle(obj, debug: bool) -> "go.Figure":
         return go.Figure(data=obj["3D_plot"])
 
     fig = go.Figure()
-    _add_object_traces(fig, obj, "trajectory", debug)
+    _add_object_traces(
+        fig,
+        obj,
+        "trajectory",
+        debug,
+        highlight_endpoints=highlight_endpoints,
+        start_color=start_color,
+        end_color=end_color,
+        endpoint_size=endpoint_size,
+    )
     fig.update_layout(scene=dict(aspectmode="data"))
     return fig
 
@@ -168,6 +260,15 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--fix_axes_limits", action="store_true", help="Set axes limits to pre-defined values (defined within script.)")
     parser.add_argument("--debug", action="store_true", help="Print inferred format and keys to stderr.")
     parser.add_argument("--no-dash", action="store_true", help="Never start Dash (just open the figure).")
+    parser.add_argument(
+        "--highlight_endpoints",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Overlay large colored spheres at trajectory start/end (trajectory pickles only).",
+    )
+    parser.add_argument("--start_color", default="#2ecc71", help="Start-point sphere color (any Plotly color).")
+    parser.add_argument("--end_color", default="#e74c3c", help="End-point sphere color (any Plotly color).")
+    parser.add_argument("--endpoint_size", type=float, default=10.0, help="Sphere marker size for start/end.")
     args = parser.parse_args(argv)
 
     if args.pickle_path is None:
@@ -195,7 +296,14 @@ def main(argv: list[str]) -> int:
         pk_paths = _pk_paths_in_folder(pickle_path)
         if not pk_paths:
             raise SystemExit(f"No .pk files found in: {pickle_path}")
-        fig = _make_figure_from_pickles(pk_paths, debug=args.debug)
+        fig = _make_figure_from_pickles(
+            pk_paths,
+            debug=args.debug,
+            highlight_endpoints=args.highlight_endpoints,
+            start_color=args.start_color,
+            end_color=args.end_color,
+            endpoint_size=args.endpoint_size,
+        )
     else:
         if not os.path.isfile(pickle_path):
             raise SystemExit(f"Not a file (use --folder for directories): {pickle_path}")
@@ -203,7 +311,14 @@ def main(argv: list[str]) -> int:
         if args.debug and isinstance(obj, dict):
             print(f"[plot_3D] loaded: {pickle_path}", file=sys.stderr)
             print(f"[plot_3D] top-level keys ({len(obj)}): {sorted(obj.keys())}", file=sys.stderr)
-        fig = _make_figure_from_pickle(obj, debug=args.debug)
+        fig = _make_figure_from_pickle(
+            obj,
+            debug=args.debug,
+            highlight_endpoints=args.highlight_endpoints,
+            start_color=args.start_color,
+            end_color=args.end_color,
+            endpoint_size=args.endpoint_size,
+        )
 
     camera = dict(
         eye=dict(x=-0.8550474526258948, y=-0.8632259816571023, z=0.8694060571650828),

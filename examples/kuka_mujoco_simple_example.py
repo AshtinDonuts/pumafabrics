@@ -16,8 +16,7 @@ import pybullet
 Example of KUKA iiwa 14 running TamedPUMA as a controller.
 """
 class example_kuka_TamedPUMA(ExampleGeneric):
-    def __init__(self, file_name="kuka_TamedPUMA_wipe_mujoco"):  # TODO: @user modify as needed.
-        super(ExampleGeneric, self).__init__()
+    def __init__(self, file_name="mujoco_kuka_simple_params"):  # TODO: @user - replace with desired params file
         self.GOAL_REACHED = False
         self.IN_COLLISION = False
         self.time_to_goal = float("nan")
@@ -175,7 +174,7 @@ def main(render=True):
         [0., 0., 0.] for _ in range(len(q_init_list))
     ]
     goal_vel_list[0] = [-0.01, 0., 0.]
-    network_yaml = "kuka_TamedPUMA_wipe_mujoco"
+    network_yaml = "kuka_TamedPUMA_mjc_simple_config" # TODO @user - modify params
     example_class = example_kuka_TamedPUMA(file_name=network_yaml)
     index = 0
     example_class.overwrite_defaults(params=example_class.params, init_pos=q_init_list[index], positions_obstacles=[], render=render, speed_obstacles=[], goal_pos=goal_pos_list[index], goal_vel=goal_vel_list[index])

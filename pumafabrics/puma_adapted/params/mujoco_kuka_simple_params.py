@@ -8,7 +8,7 @@ class Params:
     # You can pass either a named dataset (e.g., 'kuka') or a direct directory path
     # containing demo pickle files (e.g., ee_state_*.pk). ##
     dataset_name: str = '/home/khw/Projects/robomimic/datasets/puma_demo_dir/simple_line'  # TODO: @user - Update parameters
-    results_path: str = './results/wipe_mujoco_kuka_simple_line/'  # TODO: @user - Update parameters
+    results_path: str = './results/mujoco_kuka_simple_line0'  # TODO: @user - Update parameters
     multi_motion: bool = False  # true when learning multiple motions together
     selected_primitives_ids: str = '0'  # ignored when dataset_name is a directory
     manifold_dimensions: int = 6  # dimensionality of the data manifold
@@ -36,7 +36,7 @@ class Params:
     """ Training """
     train: bool = True  # true when training
     load_model: bool = False  # true to load previously trained model
-    max_iterations: int = 5000 # maximum number of training iterations
+    max_iterations: int = 48_000   # 48_000  maximum number of training iterations
 
     """ Preprocessing """
     spline_sample_type: str = 'from data'  # resample from spline type, options: from data, evenly spaced
