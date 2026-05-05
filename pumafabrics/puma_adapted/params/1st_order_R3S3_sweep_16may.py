@@ -25,8 +25,8 @@ class Params:
     triplet_type: str = 'spherical'  # distance metric used in triplet loss
     imitation_loss_weight: float = 1  # imitation loss weight
     stabilization_loss_weight: float = 1  # stability loss weight
-    boundary_loss_weight: float = 0.001  # boundary loss weight
-    imitation_window_size: int = 15  # imitation window size
+    boundary_loss_weight: float = 0.01  # boundary loss weight  # @user default= 0.001
+    imitation_window_size: int = 15  # imitation window size  
     stabilization_window_size: int = 2  # stability window size
     triplet_margin: float = 1e-8  # 1.25e-4 for triplet  # triplet loss margin
     interpolation_sigma: float = 0.8  # percentage of points sampled in demonstrations space when multi-model learning

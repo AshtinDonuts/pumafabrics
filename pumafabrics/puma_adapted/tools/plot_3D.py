@@ -93,8 +93,8 @@ def _add_object_traces(
     debug: bool,
     *,
     highlight_endpoints: bool = True,
-    start_color: str = "#2ecc71",
-    end_color: str = "#e74c3c",
+    start_color: str = "#2ecc71",  # Green
+    end_color: str = "#e74c3c",   # Red
     endpoint_size: float = 10.0,
 ) -> None:
     """

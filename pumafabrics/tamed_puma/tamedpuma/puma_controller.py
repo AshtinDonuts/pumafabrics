@@ -102,22 +102,38 @@ class PUMAControl():
         xdot_pos_quat, euler_vel = self.vel_NN_rescale(transition_info, offset_orientation,
                                                                        xee_orientation, self.normalizations,
                                                                        self.kuka_kinematics)
-        xddot_pos_quat = self.acc_NN_rescale(transition_info, offset_orientation, xee_orientation,
-                                                             self.normalizations, self.kuka_kinematics)
+        xddot_pos_quat = None
+        if transition_info.get("desired acceleration", None) is not None:
+            xddot_pos_quat = self.acc_NN_rescale(
+                transition_info,
+                offset_orientation,
+                xee_orientation,
+                self.normalizations,
+                self.kuka_kinematics,
+            )
         x_t_action = self.normalizations.reverse_transformation_pos_quat(state_gpu=transition_info["desired state"],
                                                                     offset_orientation=offset_orientation)
 
         # ---- velocity action_PUMA: option 1 ---- #
+        # Ensure Jacobian is computed for current q before inverse differential kinematics.
+        self.kuka_kinematics.call_jacobian(q=q)
         qdot_PUMA_pulled = self.kuka_kinematics.inverse_diff_kinematics_quat(xdot=xdot_pos_quat,
                                                                                  angle_quaternion=xee_orientation).numpy()[0]
 
-        #### --------------- directly from acceleration!! -----#
-        qddot_PUMA, self.Jac_prev, Jac_dot_prev = self.kuka_kinematics.inverse_2nd_kinematics_quat(q=q,
-                                                                                                  qdot=qdot_PUMA_pulled,
-                                                                                                  xddot=xddot_pos_quat,
-                                                                                                  angle_quaternion=xee_orientation,
-                                                                                                  Jac_prev=self.Jac_prev)
-        qddot_PUMA = qddot_PUMA.numpy()[0]
+        # If the learned dynamical system is first-order, it won't output acceleration.
+        # In that case, convert desired joint velocity into a joint acceleration command.
+        if xddot_pos_quat is None:
+            qddot_PUMA = (qdot_PUMA_pulled - qdot) / float(self.params["dt"])
+        else:
+            #### --------------- directly from acceleration!! -----#
+            qddot_PUMA, self.Jac_prev, Jac_dot_prev = self.kuka_kinematics.inverse_2nd_kinematics_quat(
+                q=q,
+                qdot=qdot_PUMA_pulled,
+                xddot=xddot_pos_quat,
+                angle_quaternion=xee_orientation,
+                Jac_prev=self.Jac_prev,
+            )
+            qddot_PUMA = qddot_PUMA.numpy()[0]
         if self.NULLSPACE:
             action_nullspace = self.controller_nullspace._nullspace_control(q=q, qdot=qdot)
             qddot_PUMA = qddot_PUMA + action_nullspace
