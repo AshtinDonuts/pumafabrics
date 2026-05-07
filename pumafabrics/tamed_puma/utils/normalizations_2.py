@@ -98,6 +98,11 @@ class normalization_functions(denormalizations):
     def translation_goal(self, state_goal, goal_NN):
         # Translation of goal:
         goal_normalized = self.call_normalize_state(state=state_goal)
+        if not getattr(self, "reanchor_goal", True):
+            translation = np.zeros_like(goal_normalized, dtype=np.float64)
+            self.translation = translation  # reverse_translation / reverse_transformation_pos_quat expect this
+            translation_gpu = torch.FloatTensor(translation).cuda()
+            return translation_gpu, translation
         translation = self.get_translation(goal_pos=goal_normalized, goal_pos_NN=goal_NN)
         if len(translation)>3:
             translation[3:] = np.zeros(4)

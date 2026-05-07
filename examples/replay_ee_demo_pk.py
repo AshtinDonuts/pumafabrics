@@ -2,7 +2,7 @@ import argparse
 import os
 import pickle
 import time
-from typing import Iterable, Tuple
+from typing import Iterable, Optional, Tuple
 
 import numpy as np
 
@@ -54,7 +54,7 @@ def _rotmat_to_quat_xyzw(R: np.ndarray) -> Tuple[float, float, float, float]:
     return float(q[0]), float(q[1]), float(q[2]), float(q[3])
 
 
-def _load_demo(path: str) -> tuple[np.ndarray, np.ndarray | None, float]:
+def _load_demo(path: str) -> Tuple[np.ndarray, Optional[np.ndarray], float]:
     with open(path, "rb") as f:
         obj = pickle.load(f)
     if not isinstance(obj, dict):
@@ -81,7 +81,9 @@ def _load_demo(path: str) -> tuple[np.ndarray, np.ndarray | None, float]:
     return x_pos, x_rot, dt
 
 
-def _iter_waypoints(x_pos: np.ndarray, x_rot: np.ndarray | None) -> Iterable[tuple[np.ndarray, tuple[float, float, float, float] | None]]:
+def _iter_waypoints(
+    x_pos: np.ndarray, x_rot: Optional[np.ndarray]
+) -> Iterable[Tuple[np.ndarray, Optional[Tuple[float, float, float, float]]]]:
     if x_rot is None:
         for pos in x_pos:
             yield pos, None

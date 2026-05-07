@@ -6,7 +6,7 @@ import numpy as np
 class Params:
     """ General parameters """
     dataset_name: str = 'kuka'  # selects dataset, options: LASA, LAIR, optitrack, interpolation, joint_space, ABB_R3S3
-    results_path: str = './results/2nd_order_R3S3_tomato_31may/'
+    results_path: str = './results/2nd_order_R3S3_tomato_31may/'  # @USER
     multi_motion: bool = False  # true when learning multiple motions together
     selected_primitives_ids: str = '6'  # id number from dataset_keys.py, e.g., '2' or '4,0,6'
     manifold_dimensions: int = 6  # dimensionality of the data manifold
@@ -17,18 +17,18 @@ class Params:
     """ Neural Network """
     latent_space_dim: int = 800  # dimensionality latent space
     neurons_hidden_layers: int = 800  # number of neurons per layer
-    batch_size: int = 300  # sampling batch size
+    batch_size: int = 300
     learning_rate: float = 0.0001  # AdamW learning rate
     weight_decay: float = 0.0000  # AdamW weight decay
 
     """ Contrastive Imitation """
-    triplet_type: str = 'spherical'  # distance metric used in triplet loss
-    imitation_loss_weight: float = 1.0  # imitation loss weight
-    stabilization_loss_weight: float = 1.0  # stability loss weight
-    boundary_loss_weight: float = 10.0   # boundary loss weight
-    imitation_window_size: int = 13  # imitation window size
-    stabilization_window_size: int = 2  # stability window size
-    triplet_margin: float = 1e-6  # 1.25e-4 for triplet  # triplet loss margin
+    triplet_type: str = 'spherical'
+    imitation_loss_weight: float = 1.0
+    stabilization_loss_weight: float = 1.0
+    boundary_loss_weight: float = 10.0  ## @USER - Default : ??   # TRAIN only
+    imitation_window_size: int = 13
+    stabilization_window_size: int = 2
+    triplet_margin: float = 1e-6  # 1.25e-4 for triplet
     interpolation_sigma: float = 0.8  # percentage of points sampled in demonstrations space when multi-model learning
 
     """ Training """

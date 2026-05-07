@@ -9,11 +9,31 @@ from torch.utils.tensorboard import SummaryWriter
 parser = ArgumentParser()
 parser.add_argument('--params', type=str, default='2nd_order_R3S3_kinova', help='')
 parser.add_argument('--results-base-directory', type=str, default='./', help='')
+parser.add_argument(
+    '--results-path',
+    type=str,
+    default=None,
+    help='If set, replaces the params module results_path (relative segment only); '
+         'final path is results_base_directory + this + selected_primitives_ids/.',
+)
+parser.add_argument(
+    '--boundary-loss-weight',
+    type=float,
+    default=None,
+    help='If set, overrides params.boundary_loss_weight after loading the params module.'
+)
 args = parser.parse_args()
 
 # Import parameters
 Params = getattr(importlib.import_module('params.' + args.params), 'Params')
 params = Params(args.results_base_directory)
+if args.boundary_loss_weight is not None:
+    params.boundary_loss_weight = args.boundary_loss_weight
+if args.results_path is not None:
+    rel = args.results_path.strip()
+    if rel and not rel.endswith('/'):
+        rel += '/'
+    params.results_path = args.results_base_directory + rel
 params.results_path += params.selected_primitives_ids + '/'
 
 # Initialize training objects

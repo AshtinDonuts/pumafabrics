@@ -83,7 +83,7 @@ class example_kuka_modulation_IK_1000(ExampleGeneric):
 
         # Normalization class
         self.normalizations = normalization_functions(x_min=data["x min"], x_max=data["x max"], dof_task=self.params["dim_task"], dt=self.params["dt"], mode_NN=self.params["mode_NN"])
-
+        self.normalizations.reanchor_goal = self.params.get("reanchor_goal", True)
 
     def run_kuka_example(self):
         dof = self.params["dof"]

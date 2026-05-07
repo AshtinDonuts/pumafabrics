@@ -28,7 +28,8 @@ class NeuralNetwork(torch.nn.Module):
         self.goals_latent_space = list(np.zeros(n_primitives))
 
         # Primitives encodings
-        self.primitives_encodings = torch.eye(n_primitives).cuda()
+        # Keep device-agnostic; move to CUDA only when training code chooses to.
+        self.primitives_encodings = torch.eye(n_primitives)
 
         # Initialize encoder layers: psi
         if multi_motion:
@@ -103,10 +104,13 @@ class NeuralNetwork(torch.nn.Module):
 
         return encoding_batch
 
-    def encoder(self, x_t, primitive_type=torch.FloatTensor(1).cuda()):
+    def encoder(self, x_t, primitive_type=None):
         """
         Maps task space state to latent space state (psi)
         """
+        if primitive_type is None:
+            primitive_type = torch.FloatTensor([0])
+
         # Get batch encodings
         if primitive_type.ndim == 1:  # if primitive type needs to be encoded
             encoding = self.get_encoding_batch(primitive_type)

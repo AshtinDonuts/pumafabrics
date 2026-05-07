@@ -84,8 +84,9 @@ class PUMAControl():
 
         # Normalization class
         self.normalizations = normalization_functions(x_min=data["x min"], x_max=data["x max"], dof_task=self.params["dim_task"], dt=self.params["dt"], mode_NN=self.params["mode_NN"], learner=learner)
+        self.normalizations.reanchor_goal = self.params.get("reanchor_goal", True)
 
-        # Translation of goal:
+        # Translation of goal (zero if reanchor_goal is False: NN attractor stays at training goal in normalized coords)
         translation_gpu, translation_cpu = self.normalizations.translation_goal(state_goal = np.append(goal_pos, offset_orientation), goal_NN=goal_NN)
 
         # initial state:
