@@ -360,3 +360,461 @@ RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda 
 [2026-05-08 06:56:52]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
 [2026-05-08 06:56:52]   [fix] CUDA OOM detected, waiting 30s before retry
 [2026-05-08 06:56:52]   [fix] CUDA OOM detected, waiting 30s before retry
+[2026-05-08 06:57:22]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 06:57:22]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 06:57:22]   Attempt 2/2
+[2026-05-08 06:57:22]   Attempt 2/2
+[2026-05-08 06:57:22]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_line_blw1p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_line_blw1p0/ --boundary-loss-weight 1.0
+[2026-05-08 06:57:22]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_line_blw1p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_line_blw1p0/ --boundary-loss-weight 1.0
+params.results_path: /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/results/2nd_order_R3S3_simple_line_blw1p0/6/
+Data preprocessing, demonstration 1 / 15
+Data preprocessing, demonstration 2 / 15
+Data preprocessing, demonstration 3 / 15
+Data preprocessing, demonstration 4 / 15
+Data preprocessing, demonstration 5 / 15
+Data preprocessing, demonstration 6 / 15
+Data preprocessing, demonstration 7 / 15
+Data preprocessing, demonstration 8 / 15
+Data preprocessing, demonstration 9 / 15
+Data preprocessing, demonstration 10 / 15
+Data preprocessing, demonstration 11 / 15
+Data preprocessing, demonstration 12 / 15
+Data preprocessing, demonstration 13 / 15
+Data preprocessing, demonstration 14 / 15
+Data preprocessing, demonstration 15 / 15
+Mean error spline resampling: 0.0
+/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+Traceback (most recent call last):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py", line 60, in <module>
+    learner, evaluator, data = initialize_framework(params, args.params)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/initializer.py", line 25, in initialize_framework
+    learner = ContrastiveImitation(data=data, params=params)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/contrastive_imitation.py", line 39, in __init__
+    self.goals_tensor = torch.FloatTensor(data['goals training']).cuda()
+  File "/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py", line 412, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:57:23]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:57:23]   GAVE UP after 2 attempts: 2nd_order_R3S3_simple_line_blw1p0
+[2026-05-08 06:57:23] 
+────────────────────────────────────────────────────────────
+[2026-05-08 06:57:23] JOB: 2nd_order_R3S3_simple_line_blw10p0  (blw=10.0)
+[2026-05-08 06:57:23]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:57:23]   GAVE UP after 2 attempts: 2nd_order_R3S3_simple_line_blw1p0
+[2026-05-08 06:57:23] 
+────────────────────────────────────────────────────────────
+[2026-05-08 06:57:23] JOB: 2nd_order_R3S3_simple_line_blw10p0  (blw=10.0)
+[2026-05-08 06:57:23]   Attempt 1/2
+[2026-05-08 06:57:23]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_line_blw10p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_line_blw10p0/ --boundary-loss-weight 10.0
+[2026-05-08 06:57:23]   Attempt 1/2
+[2026-05-08 06:57:23]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_line_blw10p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_line_blw10p0/ --boundary-loss-weight 10.0
+params.results_path: /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/results/2nd_order_R3S3_simple_line_blw10p0/6/
+Data preprocessing, demonstration 1 / 15
+Data preprocessing, demonstration 2 / 15
+Data preprocessing, demonstration 3 / 15
+Data preprocessing, demonstration 4 / 15
+Data preprocessing, demonstration 5 / 15
+Data preprocessing, demonstration 6 / 15
+Data preprocessing, demonstration 7 / 15
+Data preprocessing, demonstration 8 / 15
+Data preprocessing, demonstration 9 / 15
+Data preprocessing, demonstration 10 / 15
+Data preprocessing, demonstration 11 / 15
+Data preprocessing, demonstration 12 / 15
+Data preprocessing, demonstration 13 / 15
+Data preprocessing, demonstration 14 / 15
+Data preprocessing, demonstration 15 / 15
+Mean error spline resampling: 0.0
+/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+Traceback (most recent call last):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py", line 60, in <module>
+    learner, evaluator, data = initialize_framework(params, args.params)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/initializer.py", line 25, in initialize_framework
+    learner = ContrastiveImitation(data=data, params=params)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/contrastive_imitation.py", line 39, in __init__
+    self.goals_tensor = torch.FloatTensor(data['goals training']).cuda()
+  File "/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py", line 412, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:57:24]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:57:24]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:57:24]   [fix] CUDA OOM detected, waiting 30s before retry
+[2026-05-08 06:57:24]   [fix] CUDA OOM detected, waiting 30s before retry
+[2026-05-08 06:57:54]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 06:57:54]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 06:57:54]   Attempt 2/2
+[2026-05-08 06:57:54]   Attempt 2/2
+[2026-05-08 06:57:54]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_line_blw10p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_line_blw10p0/ --boundary-loss-weight 10.0
+[2026-05-08 06:57:54]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_line_blw10p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_line_blw10p0/ --boundary-loss-weight 10.0
+Traceback (most recent call last):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py", line 5, in <module>
+    from pumafabrics.puma_adapted.initializer import initialize_framework
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/initializer.py", line 5, in <module>
+    from pumafabrics.puma_adapted.agent.contrastive_imitation import ContrastiveImitation
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/contrastive_imitation.py", line 4, in <module>
+    from pumafabrics.puma_adapted.agent.neural_network import NeuralNetwork
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/neural_network.py", line 7, in <module>
+    class NeuralNetwork(torch.nn.Module):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/neural_network.py", line 106, in NeuralNetwork
+    def encoder(self, x_t, primitive_type=torch.FloatTensor(1).cuda()):
+  File "/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py", line 412, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:57:55]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:57:55]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:57:55]   GAVE UP after 2 attempts: 2nd_order_R3S3_simple_line_blw10p0
+[2026-05-08 06:57:55]   GAVE UP after 2 attempts: 2nd_order_R3S3_simple_line_blw10p0
+[2026-05-08 06:57:55] 
+────────────────────────────────────────────────────────────
+[2026-05-08 06:57:55] 
+────────────────────────────────────────────────────────────
+[2026-05-08 06:57:55] JOB: 2nd_order_R3S3_simple_wipe_blw0p01  (blw=0.01)
+[2026-05-08 06:57:55] JOB: 2nd_order_R3S3_simple_wipe_blw0p01  (blw=0.01)
+[2026-05-08 06:57:55]   Attempt 1/2
+[2026-05-08 06:57:55]   Attempt 1/2
+[2026-05-08 06:57:55]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_wipe_blw0p01 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_wipe_blw0p01/ --boundary-loss-weight 0.01
+[2026-05-08 06:57:55]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_wipe_blw0p01 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_wipe_blw0p01/ --boundary-loss-weight 0.01
+Traceback (most recent call last):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py", line 5, in <module>
+    from pumafabrics.puma_adapted.initializer import initialize_framework
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/initializer.py", line 5, in <module>
+    from pumafabrics.puma_adapted.agent.contrastive_imitation import ContrastiveImitation
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/contrastive_imitation.py", line 4, in <module>
+    from pumafabrics.puma_adapted.agent.neural_network import NeuralNetwork
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/neural_network.py", line 7, in <module>
+    class NeuralNetwork(torch.nn.Module):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/neural_network.py", line 106, in NeuralNetwork
+    def encoder(self, x_t, primitive_type=torch.FloatTensor(1).cuda()):
+  File "/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py", line 412, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:57:56]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:57:56]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:57:56]   [fix] CUDA OOM detected, waiting 30s before retry
+[2026-05-08 06:57:56]   [fix] CUDA OOM detected, waiting 30s before retry
+[2026-05-08 06:58:26]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 06:58:26]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 06:58:26]   Attempt 2/2
+[2026-05-08 06:58:26]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_wipe_blw0p01 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_wipe_blw0p01/ --boundary-loss-weight 0.01
+[2026-05-08 06:58:26]   Attempt 2/2
+[2026-05-08 06:58:26]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_wipe_blw0p01 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_wipe_blw0p01/ --boundary-loss-weight 0.01
+Traceback (most recent call last):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py", line 5, in <module>
+    from pumafabrics.puma_adapted.initializer import initialize_framework
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/initializer.py", line 5, in <module>
+    from pumafabrics.puma_adapted.agent.contrastive_imitation import ContrastiveImitation
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/contrastive_imitation.py", line 4, in <module>
+    from pumafabrics.puma_adapted.agent.neural_network import NeuralNetwork
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/neural_network.py", line 7, in <module>
+    class NeuralNetwork(torch.nn.Module):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/neural_network.py", line 106, in NeuralNetwork
+    def encoder(self, x_t, primitive_type=torch.FloatTensor(1).cuda()):
+  File "/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py", line 412, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:58:27]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:58:27]   GAVE UP after 2 attempts: 2nd_order_R3S3_simple_wipe_blw0p01
+[2026-05-08 06:58:27] 
+────────────────────────────────────────────────────────────
+[2026-05-08 06:58:27] JOB: 2nd_order_R3S3_simple_wipe_blw1p0  (blw=1.0)
+[2026-05-08 06:58:27]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:58:27]   GAVE UP after 2 attempts: 2nd_order_R3S3_simple_wipe_blw0p01
+[2026-05-08 06:58:27] 
+────────────────────────────────────────────────────────────
+[2026-05-08 06:58:27] JOB: 2nd_order_R3S3_simple_wipe_blw1p0  (blw=1.0)
+[2026-05-08 06:58:27]   SKIP — results already exist
+[2026-05-08 06:58:27]   SKIP — results already exist
+[2026-05-08 06:58:27] 
+────────────────────────────────────────────────────────────
+[2026-05-08 06:58:27] 
+────────────────────────────────────────────────────────────
+[2026-05-08 06:58:27] JOB: 2nd_order_R3S3_simple_wipe_blw10p0  (blw=10.0)
+[2026-05-08 06:58:27] JOB: 2nd_order_R3S3_simple_wipe_blw10p0  (blw=10.0)
+[2026-05-08 06:58:27]   Attempt 1/2
+[2026-05-08 06:58:27]   Attempt 1/2
+[2026-05-08 06:58:27]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_wipe_blw10p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_wipe_blw10p0/ --boundary-loss-weight 10.0
+[2026-05-08 06:58:27]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_wipe_blw10p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_wipe_blw10p0/ --boundary-loss-weight 10.0
+Traceback (most recent call last):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py", line 5, in <module>
+    from pumafabrics.puma_adapted.initializer import initialize_framework
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/initializer.py", line 5, in <module>
+    from pumafabrics.puma_adapted.agent.contrastive_imitation import ContrastiveImitation
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/contrastive_imitation.py", line 4, in <module>
+    from pumafabrics.puma_adapted.agent.neural_network import NeuralNetwork
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/neural_network.py", line 7, in <module>
+    class NeuralNetwork(torch.nn.Module):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/neural_network.py", line 106, in NeuralNetwork
+    def encoder(self, x_t, primitive_type=torch.FloatTensor(1).cuda()):
+  File "/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py", line 412, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:58:28]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:58:28]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:58:28]   [fix] CUDA OOM detected, waiting 30s before retry
+[2026-05-08 06:58:28]   [fix] CUDA OOM detected, waiting 30s before retry
+[2026-05-08 06:58:58]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 06:58:58]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 06:58:58]   Attempt 2/2
+[2026-05-08 06:58:58]   Attempt 2/2
+[2026-05-08 06:58:58]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_wipe_blw10p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_wipe_blw10p0/ --boundary-loss-weight 10.0
+[2026-05-08 06:58:58]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_simple_wipe_blw10p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_simple_wipe_blw10p0/ --boundary-loss-weight 10.0
+/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+Traceback (most recent call last):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py", line 5, in <module>
+    from pumafabrics.puma_adapted.initializer import initialize_framework
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/initializer.py", line 5, in <module>
+    from pumafabrics.puma_adapted.agent.contrastive_imitation import ContrastiveImitation
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/contrastive_imitation.py", line 4, in <module>
+    from pumafabrics.puma_adapted.agent.neural_network import NeuralNetwork
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/neural_network.py", line 9, in <module>
+    class NeuralNetwork(torch.nn.Module):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/neural_network.py", line 108, in NeuralNetwork
+    def encoder(self, x_t, primitive_type=torch.FloatTensor(1).cuda()):
+  File "/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py", line 412, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:58:58]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:58:58]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:58:58]   GAVE UP after 2 attempts: 2nd_order_R3S3_simple_wipe_blw10p0
+[2026-05-08 06:58:58]   GAVE UP after 2 attempts: 2nd_order_R3S3_simple_wipe_blw10p0
+[2026-05-08 06:58:58] 
+────────────────────────────────────────────────────────────
+[2026-05-08 06:58:58] 
+────────────────────────────────────────────────────────────
+[2026-05-08 06:58:58] JOB: 2nd_order_R3S3_table_wipe_puma0_blw0p01  (blw=0.01)
+[2026-05-08 06:58:58] JOB: 2nd_order_R3S3_table_wipe_puma0_blw0p01  (blw=0.01)
+[2026-05-08 06:58:58]   Attempt 1/2
+[2026-05-08 06:58:58]   Attempt 1/2
+[2026-05-08 06:58:58]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_table_wipe_puma0_blw0p01 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_table_wipe_puma0_blw0p01/ --boundary-loss-weight 0.01
+[2026-05-08 06:58:58]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_table_wipe_puma0_blw0p01 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_table_wipe_puma0_blw0p01/ --boundary-loss-weight 0.01
+/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+Traceback (most recent call last):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py", line 5, in <module>
+    from pumafabrics.puma_adapted.initializer import initialize_framework
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/initializer.py", line 5, in <module>
+    from pumafabrics.puma_adapted.agent.contrastive_imitation import ContrastiveImitation
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/contrastive_imitation.py", line 4, in <module>
+    from pumafabrics.puma_adapted.agent.neural_network import NeuralNetwork
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/neural_network.py", line 9, in <module>
+    class NeuralNetwork(torch.nn.Module):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/neural_network.py", line 108, in NeuralNetwork
+    def encoder(self, x_t, primitive_type=torch.FloatTensor(1).cuda()):
+  File "/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py", line 412, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:58:59]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:58:59]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:58:59]   [fix] CUDA OOM detected, waiting 30s before retry
+[2026-05-08 06:58:59]   [fix] CUDA OOM detected, waiting 30s before retry
+[2026-05-08 06:59:29]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 06:59:29]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 06:59:29]   Attempt 2/2
+[2026-05-08 06:59:29]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_table_wipe_puma0_blw0p01 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_table_wipe_puma0_blw0p01/ --boundary-loss-weight 0.01
+[2026-05-08 06:59:29]   Attempt 2/2
+[2026-05-08 06:59:29]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_table_wipe_puma0_blw0p01 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_table_wipe_puma0_blw0p01/ --boundary-loss-weight 0.01
+params.results_path: /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/results/2nd_order_R3S3_table_wipe_puma0_blw0p01/6/
+Data preprocessing, demonstration 1 / 6
+Data preprocessing, demonstration 2 / 6
+Data preprocessing, demonstration 3 / 6
+Data preprocessing, demonstration 4 / 6
+Data preprocessing, demonstration 5 / 6
+Data preprocessing, demonstration 6 / 6
+Mean error spline resampling: 0.0
+/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+Traceback (most recent call last):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py", line 40, in <module>
+    learner, evaluator, data = initialize_framework(params, args.params)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/initializer.py", line 25, in initialize_framework
+    learner = ContrastiveImitation(data=data, params=params)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/contrastive_imitation.py", line 39, in __init__
+    self.goals_tensor = torch.FloatTensor(data['goals training']).cuda()
+  File "/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py", line 412, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:59:30]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:59:30]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:59:30]   GAVE UP after 2 attempts: 2nd_order_R3S3_table_wipe_puma0_blw0p01
+[2026-05-08 06:59:30]   GAVE UP after 2 attempts: 2nd_order_R3S3_table_wipe_puma0_blw0p01
+[2026-05-08 06:59:30] 
+────────────────────────────────────────────────────────────
+[2026-05-08 06:59:30] 
+────────────────────────────────────────────────────────────
+[2026-05-08 06:59:30] JOB: 2nd_order_R3S3_table_wipe_puma0_blw1p0  (blw=1.0)
+[2026-05-08 06:59:30] JOB: 2nd_order_R3S3_table_wipe_puma0_blw1p0  (blw=1.0)
+[2026-05-08 06:59:30]   Attempt 1/2
+[2026-05-08 06:59:30]   Attempt 1/2
+[2026-05-08 06:59:30]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_table_wipe_puma0_blw1p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_table_wipe_puma0_blw1p0/ --boundary-loss-weight 1.0
+[2026-05-08 06:59:30]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_table_wipe_puma0_blw1p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_table_wipe_puma0_blw1p0/ --boundary-loss-weight 1.0
+params.results_path: /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/results/2nd_order_R3S3_table_wipe_puma0_blw1p0/6/
+Data preprocessing, demonstration 1 / 6
+Data preprocessing, demonstration 2 / 6
+Data preprocessing, demonstration 3 / 6
+Data preprocessing, demonstration 4 / 6
+Data preprocessing, demonstration 5 / 6
+Data preprocessing, demonstration 6 / 6
+Mean error spline resampling: 0.0
+/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+Traceback (most recent call last):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py", line 40, in <module>
+    learner, evaluator, data = initialize_framework(params, args.params)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/initializer.py", line 25, in initialize_framework
+    learner = ContrastiveImitation(data=data, params=params)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/agent/contrastive_imitation.py", line 39, in __init__
+    self.goals_tensor = torch.FloatTensor(data['goals training']).cuda()
+  File "/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py", line 412, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:59:32]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:59:32]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 06:59:32]   [fix] CUDA OOM detected, waiting 30s before retry
+[2026-05-08 06:59:32]   [fix] CUDA OOM detected, waiting 30s before retry
+[2026-05-08 07:00:02]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 07:00:02]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 07:00:02]   Attempt 2/2
+[2026-05-08 07:00:02]   Attempt 2/2
+[2026-05-08 07:00:02]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_table_wipe_puma0_blw1p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_table_wipe_puma0_blw1p0/ --boundary-loss-weight 1.0
+[2026-05-08 07:00:02]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_table_wipe_puma0_blw1p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_table_wipe_puma0_blw1p0/ --boundary-loss-weight 1.0
+params.results_path: /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/results/2nd_order_R3S3_table_wipe_puma0_blw1p0/6/
+Data preprocessing, demonstration 1 / 6
+Data preprocessing, demonstration 2 / 6
+Data preprocessing, demonstration 3 / 6
+Data preprocessing, demonstration 4 / 6
+Data preprocessing, demonstration 5 / 6
+Data preprocessing, demonstration 6 / 6
+Mean error spline resampling: 0.0
+
+<<< CONDOR framework: stable and flexible movement primitives >>> 
+
+Parameters: 2nd_order_R3S3_table_wipe_puma0_blw1p0
+Dynamical System order: 2
+Dataset: /home/khw/Projects/robomimic/datasets/puma_demo_dir/table_wipe_puma0
+Demos ID: 6
+Results path: /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/results/2nd_order_R3S3_table_wipe_puma0_blw1p0/6/
+
+
+/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+Traceback (most recent call last):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py", line 51, in <module>
+    metrics_acc, metrics_stab = evaluator.run(iteration=iteration)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/evaluation/evaluate.py", line 349, in run
+    sim_results = self.simulate_system(primitive_id)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/evaluation/evaluate.py", line 139, in simulate_system
+    initial_states_demos = self.get_initial_states_demos(primitive_id)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/evaluation/evaluate.py", line 124, in get_initial_states_demos
+    initial_positions_demos = initial_positions_demos.cuda()
+  File "/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py", line 412, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 07:00:06]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 07:00:06]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 07:00:06]   GAVE UP after 2 attempts: 2nd_order_R3S3_table_wipe_puma0_blw1p0
+[2026-05-08 07:00:06]   GAVE UP after 2 attempts: 2nd_order_R3S3_table_wipe_puma0_blw1p0
+[2026-05-08 07:00:06] 
+────────────────────────────────────────────────────────────
+[2026-05-08 07:00:06] 
+────────────────────────────────────────────────────────────
+[2026-05-08 07:00:06] JOB: 2nd_order_R3S3_table_wipe_puma0_blw10p0  (blw=10.0)
+[2026-05-08 07:00:06] JOB: 2nd_order_R3S3_table_wipe_puma0_blw10p0  (blw=10.0)
+[2026-05-08 07:00:06]   Attempt 1/2
+[2026-05-08 07:00:06]   Attempt 1/2
+[2026-05-08 07:00:06]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_table_wipe_puma0_blw10p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_table_wipe_puma0_blw10p0/ --boundary-loss-weight 10.0
+[2026-05-08 07:00:06]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_table_wipe_puma0_blw10p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_table_wipe_puma0_blw10p0/ --boundary-loss-weight 10.0
+params.results_path: /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/results/2nd_order_R3S3_table_wipe_puma0_blw10p0/6/
+Data preprocessing, demonstration 1 / 6
+Data preprocessing, demonstration 2 / 6
+Data preprocessing, demonstration 3 / 6
+Data preprocessing, demonstration 4 / 6
+Data preprocessing, demonstration 5 / 6
+Data preprocessing, demonstration 6 / 6
+Mean error spline resampling: 0.0
+
+<<< CONDOR framework: stable and flexible movement primitives >>> 
+
+Parameters: 2nd_order_R3S3_table_wipe_puma0_blw10p0
+Dynamical System order: 2
+Dataset: /home/khw/Projects/robomimic/datasets/puma_demo_dir/table_wipe_puma0
+Demos ID: 6
+Results path: /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/results/2nd_order_R3S3_table_wipe_puma0_blw10p0/6/
+
+
+/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+Traceback (most recent call last):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py", line 51, in <module>
+    metrics_acc, metrics_stab = evaluator.run(iteration=iteration)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/evaluation/evaluate.py", line 349, in run
+    sim_results = self.simulate_system(primitive_id)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/evaluation/evaluate.py", line 139, in simulate_system
+    initial_states_demos = self.get_initial_states_demos(primitive_id)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/evaluation/evaluate.py", line 124, in get_initial_states_demos
+    initial_positions_demos = initial_positions_demos.cuda()
+  File "/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py", line 412, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 07:00:11]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 07:00:11]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 07:00:11]   [fix] CUDA OOM detected, waiting 30s before retry
+[2026-05-08 07:00:11]   [fix] CUDA OOM detected, waiting 30s before retry
+[2026-05-08 07:00:41]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 07:00:41]   Applied fix: Waited 30s after CUDA OOM
+[2026-05-08 07:00:41]   Attempt 2/2
+[2026-05-08 07:00:41]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_table_wipe_puma0_blw10p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_table_wipe_puma0_blw10p0/ --boundary-loss-weight 10.0
+[2026-05-08 07:00:41]   Attempt 2/2
+[2026-05-08 07:00:41]   CMD: /home/khw/miniconda3/envs/pumafabrics/bin/python /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py --params 2nd_order_R3S3_table_wipe_puma0_blw10p0 --results-base-directory /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/ --results-path results/2nd_order_R3S3_table_wipe_puma0_blw10p0/ --boundary-loss-weight 10.0
+params.results_path: /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/results/2nd_order_R3S3_table_wipe_puma0_blw10p0/6/
+Data preprocessing, demonstration 1 / 6
+Data preprocessing, demonstration 2 / 6
+Data preprocessing, demonstration 3 / 6
+Data preprocessing, demonstration 4 / 6
+Data preprocessing, demonstration 5 / 6
+Data preprocessing, demonstration 6 / 6
+Mean error spline resampling: 0.0
+
+<<< CONDOR framework: stable and flexible movement primitives >>> 
+
+Parameters: 2nd_order_R3S3_table_wipe_puma0_blw10p0
+Dynamical System order: 2
+Dataset: /home/khw/Projects/robomimic/datasets/puma_demo_dir/table_wipe_puma0
+Demos ID: 6
+Results path: /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/results/2nd_order_R3S3_table_wipe_puma0_blw10p0/6/
+
+
+/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+Traceback (most recent call last):
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/train.py", line 51, in <module>
+    metrics_acc, metrics_stab = evaluator.run(iteration=iteration)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/evaluation/evaluate.py", line 349, in run
+    sim_results = self.simulate_system(primitive_id)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/evaluation/evaluate.py", line 139, in simulate_system
+    initial_states_demos = self.get_initial_states_demos(primitive_id)
+  File "/home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/evaluation/evaluate.py", line 124, in get_initial_states_demos
+    initial_positions_demos = initial_positions_demos.cuda()
+  File "/home/khw/miniconda3/envs/pumafabrics/lib/python3.9/site-packages/torch/cuda/__init__.py", line 412, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 07:00:45]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 07:00:45]   FAILED — RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 304: OS call failed or operation not supported on this OS
+[2026-05-08 07:00:45]   GAVE UP after 2 attempts: 2nd_order_R3S3_table_wipe_puma0_blw10p0
+[2026-05-08 07:00:45]   GAVE UP after 2 attempts: 2nd_order_R3S3_table_wipe_puma0_blw10p0
+[2026-05-08 07:00:45] 
+======================================================================
+[2026-05-08 07:00:45] 
+======================================================================
+[2026-05-08 07:00:45] DONE — succeeded=0, skipped=2, failed=13
+[2026-05-08 07:00:45] DONE — succeeded=0, skipped=2, failed=13
+[2026-05-08 07:00:45] Failed jobs: ['2nd_order_R3S3_sweeping_16may_blw1p0', '2nd_order_R3S3_sweeping_16may_blw10p0', '2nd_order_R3S3_simple_w_shape_blw0p01', '2nd_order_R3S3_simple_w_shape_blw1p0', '2nd_order_R3S3_simple_w_shape_blw10p0', '2nd_order_R3S3_simple_line_blw0p01', '2nd_order_R3S3_simple_line_blw1p0', '2nd_order_R3S3_simple_line_blw10p0', '2nd_order_R3S3_simple_wipe_blw0p01', '2nd_order_R3S3_simple_wipe_blw10p0', '2nd_order_R3S3_table_wipe_puma0_blw0p01', '2nd_order_R3S3_table_wipe_puma0_blw1p0', '2nd_order_R3S3_table_wipe_puma0_blw10p0']
+[2026-05-08 07:00:45] Failed jobs: ['2nd_order_R3S3_sweeping_16may_blw1p0', '2nd_order_R3S3_sweeping_16may_blw10p0', '2nd_order_R3S3_simple_w_shape_blw0p01', '2nd_order_R3S3_simple_w_shape_blw1p0', '2nd_order_R3S3_simple_w_shape_blw10p0', '2nd_order_R3S3_simple_line_blw0p01', '2nd_order_R3S3_simple_line_blw1p0', '2nd_order_R3S3_simple_line_blw10p0', '2nd_order_R3S3_simple_wipe_blw0p01', '2nd_order_R3S3_simple_wipe_blw10p0', '2nd_order_R3S3_table_wipe_puma0_blw0p01', '2nd_order_R3S3_table_wipe_puma0_blw1p0', '2nd_order_R3S3_table_wipe_puma0_blw10p0']
+[2026-05-08 07:00:45] Attempting to send failure report to robertwongkh@gmail.com
+[2026-05-08 07:00:45] Attempting to send failure report to robertwongkh@gmail.com
+[2026-05-08 07:00:45] Could not send email (no local MTA?): [Errno 111] Connection refused
+[2026-05-08 07:00:45] Could not send email (no local MTA?): [Errno 111] Connection refused
+[2026-05-08 07:00:45] Failure report saved to /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/failure_report.txt instead
+[2026-05-08 07:00:45] Failure report saved to /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/failure_report.txt instead

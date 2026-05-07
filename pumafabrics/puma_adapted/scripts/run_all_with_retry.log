@@ -1,0 +1,13 @@
+[2026-05-08 07:05:35] ======================================================================
+[2026-05-08 07:05:35] PUMA training runner started – 5 datasets × 3 weights = 15 jobs
+[2026-05-08 07:05:35] Working directory : /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted
+[2026-05-08 07:05:35] Alert email        : a1865590@adelaide.edu.au
+[2026-05-08 07:05:35] Log file           : /home/khw/Projects/pumafabrics/pumafabrics/puma_adapted/scripts/run_all_with_retry.log
+[2026-05-08 07:05:35] ======================================================================
+[2026-05-08 07:05:35] 
+[1/15] ===== 2nd_order_R3S3_sweeping_16may_blw0p01 =====
+[2026-05-08 07:05:35]   [attempt 1] Running: python train.py --params 2nd_order_R3S3_sweeping_16may_blw0p01 --boundary-loss-weight 0.01
+[2026-05-08 07:23:38]   SUCCESS in 1082.8s
+[2026-05-08 07:23:38] 
+[2/15] ===== 2nd_order_R3S3_sweeping_16may_blw1p0 =====
+[2026-05-08 07:23:38]   [attempt 1] Running: python train.py --params 2nd_order_R3S3_sweeping_16may_blw1p0 --boundary-loss-weight 1.0

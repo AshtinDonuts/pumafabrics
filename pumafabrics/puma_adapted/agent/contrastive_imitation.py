@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
-from pumafabrics.puma_adapted.agent.neural_network import NeuralNetwork
+from pumafabrics.puma_adapted.agent.neural_network import NeuralNetwork, DEVICE
 from pumafabrics.puma_adapted.agent.utils.ranking_losses import TripletLoss, TripletAngleLoss, TripletCosineLoss, SoftTripletLoss
 from pumafabrics.puma_adapted.agent.dynamical_system import DynamicalSystem
 from pumafabrics.puma_adapted.agent.utils.dynamical_system_operations import normalize_state
@@ -36,15 +36,15 @@ class ContrastiveImitation:
         # Parameters data processor
         self.primitive_ids = np.array(data['demonstrations primitive id'])
         self.n_primitives = data['n primitives']
-        self.goals_tensor = torch.FloatTensor(data['goals training']).cuda()
+        self.goals_tensor = torch.FloatTensor(data['goals training']).to(DEVICE)
         self.demonstrations_train = data['demonstrations train']
         self.n_demonstrations = data['n demonstrations']
         self.demonstrations_length = data['demonstrations length']
-        self.min_vel = torch.from_numpy(data['vel min train'].reshape([1, self.dim_space])).float().cuda()
-        self.max_vel = torch.from_numpy(data['vel max train'].reshape([1, self.dim_space])).float().cuda()
+        self.min_vel = torch.from_numpy(data['vel min train'].reshape([1, self.dim_space])).float().to(DEVICE)
+        self.max_vel = torch.from_numpy(data['vel max train'].reshape([1, self.dim_space])).float().to(DEVICE)
         if data['acc min train'] is not None:
-            min_acc = torch.from_numpy(data['acc min train'].reshape([1, self.dim_space])).float().cuda()
-            max_acc = torch.from_numpy(data['acc max train'].reshape([1, self.dim_space])).float().cuda()
+            min_acc = torch.from_numpy(data['acc min train'].reshape([1, self.dim_space])).float().to(DEVICE)
+            max_acc = torch.from_numpy(data['acc max train'].reshape([1, self.dim_space])).float().to(DEVICE)
         else:
             min_acc = None
             max_acc = None
@@ -78,7 +78,7 @@ class ContrastiveImitation:
                                    n_primitives=self.n_primitives,
                                    multi_motion=self.multi_motion,
                                    latent_space_dim=params.latent_space_dim,
-                                   neurons_hidden_layers=params.neurons_hidden_layers).cuda()
+                                   neurons_hidden_layers=params.neurons_hidden_layers).to(DEVICE)
 
         # Initialize optimizer
         self.optimizer = torch.optim.AdamW(self.model.parameters(),
@@ -136,7 +136,7 @@ class ContrastiveImitation:
             x_t_d = dynamical_system.transition()['desired state']
 
             # Compute and accumulate error
-            imitation_error_accumulated += self.mse_loss(x_t_d[:, :self.dim_manifold], state_sample[:, :self.dim_manifold, i + 1].cuda())
+            imitation_error_accumulated += self.mse_loss(x_t_d[:, :self.dim_manifold], state_sample[:, :self.dim_manifold, i + 1].to(DEVICE))
 
         imitation_error_accumulated = imitation_error_accumulated / (self.imitation_window_size - 1)
 
@@ -174,7 +174,7 @@ class ContrastiveImitation:
         limit_options = torch.FloatTensor([-1, 1])
         limits = limit_options[selected_limit]
         replaced_samples = torch.arange(start=0, end=self.batch_size)
-        state_sample[replaced_samples, selected_axis] = limits.cuda()
+        state_sample[replaced_samples, selected_axis] = limits.to(DEVICE)
 
         # Create dynamical systems
         self.params_dynamical_system['saturate transition'] = False
@@ -206,9 +206,9 @@ class ContrastiveImitation:
             dx_axis_lower = dx_t_d[distance_lower < epsilon]
 
             # Compute normal vectors for lower and upper limits
-            normal_upper = torch.zeros(dx_axis_upper.shape).cuda()
+            normal_upper = torch.zeros(dx_axis_upper.shape).to(DEVICE)
             normal_upper[:, i] = 1
-            normal_lower = torch.zeros(dx_axis_lower.shape).cuda()
+            normal_lower = torch.zeros(dx_axis_lower.shape).to(DEVICE)
             normal_lower[:, i] = -1
 
             # Compute dot product between boundary velocities and normal vectors
@@ -219,8 +219,8 @@ class ContrastiveImitation:
                                           normal_lower.view(-1, self.dim_space, 1)).reshape(-1)
 
             # Concat with zero in case no points sampled in boundaries, to avoid nans
-            dot_product_upper = torch.cat([dot_product_upper, torch.zeros(1).cuda()])
-            dot_product_lower = torch.cat([dot_product_lower, torch.zeros(1).cuda()])
+            dot_product_upper = torch.cat([dot_product_upper, torch.zeros(1).to(DEVICE)])
+            dot_product_lower = torch.cat([dot_product_lower, torch.zeros(1).to(DEVICE)])
 
             # Compute losses
             loss += F.relu(dot_product_upper).mean()
@@ -247,10 +247,10 @@ class ContrastiveImitation:
 
         # Get sampled positions from training data
         position_sample = self.demonstrations_train[selected_demos, i_samples]
-        position_sample = torch.FloatTensor(position_sample).cuda()
+        position_sample = torch.FloatTensor(position_sample).to(DEVICE)
 
         # Create empty state
-        state_sample = torch.empty([self.batch_size, self.dim_state, self.imitation_window_size]).cuda()
+        state_sample = torch.empty([self.batch_size, self.dim_state, self.imitation_window_size]).to(DEVICE)
 
         # Fill first elements of the state with position
         state_sample[:, :self.dim_space, :] = position_sample[:, :, (self.dynamical_system_order - 1):]
@@ -265,7 +265,7 @@ class ContrastiveImitation:
 
         # Finally, get primitive ids of sampled batch (necessary when multi-motion learning)
         primitive_type_sample = self.primitive_ids[selected_demos]
-        primitive_type_sample = torch.FloatTensor(primitive_type_sample).cuda()
+        primitive_type_sample = torch.FloatTensor(primitive_type_sample).to(DEVICE)
 
         return state_sample, primitive_type_sample
 
@@ -275,19 +275,19 @@ class ContrastiveImitation:
         """
         with torch.no_grad():
             # Sample state
-            state_sample_gen = torch.Tensor(self.batch_size, self.dim_state).uniform_(-1, 1).cuda()
+            state_sample_gen = torch.Tensor(self.batch_size, self.dim_state).uniform_(-1, 1).to(DEVICE)
 
             # Choose sampling methods
             if not self.multi_motion:
-                primitive_type_sample_gen = torch.randint(0, self.n_primitives, (self.batch_size,)).cuda()
+                primitive_type_sample_gen = torch.randint(0, self.n_primitives, (self.batch_size,)).to(DEVICE)
             else:
                 # If multi-motion learning also sample in interpolation space
                 # sigma of the samples are in the demonstration spaces
-                encodings = torch.eye(self.n_primitives).cuda()
-                primitive_type_sample_gen_demo = encodings[torch.randint(0, self.n_primitives, (round(self.batch_size * self.interpolation_sigma),)).cuda()]
+                encodings = torch.eye(self.n_primitives).to(DEVICE)
+                primitive_type_sample_gen_demo = encodings[torch.randint(0, self.n_primitives, (round(self.batch_size * self.interpolation_sigma),)).to(DEVICE)]
 
                 # 1 - sigma  of the samples are in the interpolation space
-                primitive_type_sample_gen_inter = torch.rand(round(self.batch_size * (1 - self.interpolation_sigma)), self.n_primitives).cuda()
+                primitive_type_sample_gen_inter = torch.rand(round(self.batch_size * (1 - self.interpolation_sigma)), self.n_primitives).to(DEVICE)
 
                 # Concatenate both samples
                 primitive_type_sample_gen = torch.cat((primitive_type_sample_gen_demo, primitive_type_sample_gen_inter), dim=0)

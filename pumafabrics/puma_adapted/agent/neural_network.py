@@ -3,6 +3,8 @@ import torch
 #torch.manual_seed(0)
 import numpy as np
 
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 class NeuralNetwork(torch.nn.Module):
     """
@@ -28,8 +30,7 @@ class NeuralNetwork(torch.nn.Module):
         self.goals_latent_space = list(np.zeros(n_primitives))
 
         # Primitives encodings
-        # Keep device-agnostic; move to CUDA only when training code chooses to.
-        self.primitives_encodings = torch.eye(n_primitives)
+        self.primitives_encodings = torch.eye(n_primitives).to(DEVICE)
 
         # Initialize encoder layers: psi
         if multi_motion:
@@ -72,7 +73,7 @@ class NeuralNetwork(torch.nn.Module):
         Maps task space goal to latent space goal
         """
         for i in range(self.n_primitives):
-            primitive_type = torch.FloatTensor([i]).cuda()
+            primitive_type = torch.FloatTensor([i]).to(DEVICE)
             input = torch.zeros([1, self.n_input])  # add zeros as velocity goal for second order DS
             input[:, :goals[i].shape[0]] = goals[i]
             self.goals_latent_space[i] = self.encoder(input, primitive_type)
@@ -81,9 +82,9 @@ class NeuralNetwork(torch.nn.Module):
         """
         Creates a batch with latent space goals computed in 'update_goals_latent_space'
         """
-        goals_latent_space_batch = torch.zeros(primitive_type.shape[0], self.latent_space_dim).cuda()
+        goals_latent_space_batch = torch.zeros(primitive_type.shape[0], self.latent_space_dim).to(DEVICE)
         if primitive_type.ndim > 1:  # TODO: ugly fix for multi case, fix
-            one_hot = torch.FloatTensor(np.identity(primitive_type.shape[1])).cuda()  # TODO: for ugly fix
+            one_hot = torch.FloatTensor(np.identity(primitive_type.shape[1])).to(DEVICE)  # TODO: for ugly fix
             one_hot = one_hot.reshape(1, primitive_type.shape[1], primitive_type.shape[1]).repeat(primitive_type.shape[0], 1, 1)
         for i in range(self.n_primitives):
             if primitive_type.ndim > 1:  # TODO: ugly fix for multi case, fix
@@ -98,7 +99,7 @@ class NeuralNetwork(torch.nn.Module):
         """
         When multi-model learning, encodes primitive id into one-hot code
         """
-        encoding_batch = torch.zeros(primitive_type.shape[0], self.n_primitives).cuda()
+        encoding_batch = torch.zeros(primitive_type.shape[0], self.n_primitives).to(DEVICE)
         for i in range(self.n_primitives):
             encoding_batch[primitive_type == i] = self.primitives_encodings[i]
 
@@ -109,8 +110,7 @@ class NeuralNetwork(torch.nn.Module):
         Maps task space state to latent space state (psi)
         """
         if primitive_type is None:
-            primitive_type = torch.FloatTensor([0])
-
+            primitive_type = torch.FloatTensor(1).to(DEVICE)
         # Get batch encodings
         if primitive_type.ndim == 1:  # if primitive type needs to be encoded
             encoding = self.get_encoding_batch(primitive_type)
@@ -119,10 +119,10 @@ class NeuralNetwork(torch.nn.Module):
 
         # Encoder layer 1
         if self.multi_motion:
-            input_encoded = torch.cat((x_t.cuda(), encoding), dim=1)
+            input_encoded = torch.cat((x_t.to(DEVICE), encoding), dim=1)
             e_1 = self.activation(self.norm_e_1(self.encoder1(input_encoded)))
         else:
-            e_1 = self.activation(self.norm_e_1(self.encoder1(x_t.cuda())))
+            e_1 = self.activation(self.norm_e_1(self.encoder1(x_t.to(DEVICE))))
 
         # Encoder layer 2
         e_2 = self.activation(self.norm_e_2(self.encoder2(e_1)))
@@ -132,9 +132,9 @@ class NeuralNetwork(torch.nn.Module):
         return e_3
 
     def potential_from_encoder(self, x_t_zero_vel):
-        y_t_zero_vel = self.encoder(x_t=x_t_zero_vel, primitive_type=torch.FloatTensor(1).cuda())
+        y_t_zero_vel = self.encoder(x_t=x_t_zero_vel, primitive_type=torch.FloatTensor(1).to(DEVICE))
         y_goal = self.get_goals_latent_space_batch(
-            primitive_type=torch.FloatTensor(1).cuda())
+            primitive_type=torch.FloatTensor(1).to(DEVICE))
 
         # potential and its gradient
         y_difference = y_goal - y_t_zero_vel
