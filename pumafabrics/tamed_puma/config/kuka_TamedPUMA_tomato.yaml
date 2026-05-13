@@ -45,4 +45,4 @@ goal_pos: [0.58, -0.214,  0.115]  # TODO @USER DEFAULT: [0.58, -0.214,  0.115]
 goal_vel: [0., 0., 0.] 
 orientation_goal: [ 0.4426, -0.5459,  0.5806, -0.4112]
 # params_name_1st: "1st_order_R3S3_converge"
-params_name_2nd: "2nd_order_R3S3_tomato_31may_blw10p0" # TODO @user : WEIGHTS folder
+params_name_2nd: "2nd_order_R3S3_sweeping_16may_blw0p01" # TODO @user : WEIGHTS folder

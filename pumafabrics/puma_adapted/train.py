@@ -1,7 +1,7 @@
 import importlib
 import time
 
-from simple_parsing import ArgumentParser
+from simple_parsing import ArgumentParser  # pyright: ignore[reportMissingImports]
 from pumafabrics.puma_adapted.initializer import initialize_framework
 from torch.utils.tensorboard import SummaryWriter
 

@@ -30,8 +30,10 @@ def draw_world_axes(origin=(0.0, 0.0, 0.0), axis_len=0.2, line_width=3, life_tim
     pybullet.addUserDebugText("Z", [ox, oy, oz + axis_len], [0.2, 0.2, 1], textSize=1.2, lifeTime=life_time)
 
 class example_kuka_TamedPUMA(ExampleGeneric):
-    def __init__(self, file_name=None):  # Update: override network yaml cfg in __main__()
+    def __init__(self, file_name=None, record_video=False, video_path="simulation_video.mp4"):  # @USER Update: override network yaml cfg in __main__()
         super(ExampleGeneric, self).__init__()
+        self.record_video = record_video
+        self.video_path = video_path
         self.GOAL_REACHED = False
         self.IN_COLLISION = False
         self.time_to_goal = float("nan")
@@ -88,81 +90,92 @@ class example_kuka_TamedPUMA(ExampleGeneric):
         qdot_diff_list = []
         quat_prev = copy.deepcopy(x_t_init[3:7])
 
-        for w in range(n_steps):
-            # --- state from observation --- #
-            ob_robot = ob['robot_0']
-            q = ob_robot["joint_state"]["position"][0:dof]
-            qdot = ob_robot["joint_state"]["velocity"][0:dof]
-            if self.params["nr_obst"]>0:
-                self.obstacles = list(ob["robot_0"]["FullSensor"]["obstacles"].values())
-            else:
-                self.obstacles = []
+        video_log_id = None
+        if self.record_video:
+            video_log_id = pybullet.startStateLogging(
+                pybullet.STATE_LOGGING_VIDEO_MP4,
+                self.video_path,
+            )
 
-            # recompute translation to goal pose:
-            goal_pos = [goal_pos[i] + self.params["goal_vel"][i]*self.params["dt"] for i in range(len(goal_pos))]
-            translation_gpu, translation_cpu = normalizations.translation_goal(state_goal=np.append(goal_pos, orientation_goal), goal_NN=goal_NN)
-            energy_regulation_class.relationship_dq_dx(offset_orientation, translation_cpu, self.kuka_kinematics,
-                                                       normalizations, self.fk)
-            pybullet.addUserDebugPoints([goal_pos], [[1, 0, 0]], 5, 0.1)
-
-            # --- end-effector states and normalized states --- #
-            x_t, xee_orientation, _ = self.kuka_kinematics.get_state_task(q, quat_prev, mode_NN=self.params["mode_NN"], qdot=qdot)
-            quat_prev = copy.deepcopy(xee_orientation)
-
-            # --- action by NN --- #
-            time0 = time.perf_counter()
-            qddot_PUMA, transition_info = self.puma_controller.request_PUMA(q=q,
-                                                                                qdot=qdot,
-                                                                                x_t=x_t,
-                                                                                xee_orientation=xee_orientation,
-                                                                                offset_orientation=offset_orientation,
-                                                                                translation_cpu=translation_cpu
-                                                                                )
-
-            if self.params["bool_combined"] == True:
-                # ----- Fabrics action ----#
-                action_avoidance, M_avoidance, f_avoidance, qddot_speed = self.fabrics_controller.compute_action_avoidance(q=q, ob_robot=ob_robot)
-
-                if self.params["bool_energy_regulator"] == True:
-                    weight_attractor = 1.
-                    # ---- get action by CPM via theorem III.5 in https://arxiv.org/pdf/2309.07368.pdf ---#
-                    action_combined = energy_regulation_class.compute_action_theorem_III5(q=q, qdot=qdot,
-                                                                                          qddot_attractor = qddot_PUMA,
-                                                                                          action_avoidance=action_avoidance,
-                                                                                          M_avoidance=M_avoidance,
-                                                                                          transition_info=transition_info,
-                                                                                          weight_attractor=weight_attractor)
+        try:
+            for w in range(n_steps):
+                # --- state from observation --- #
+                ob_robot = ob['robot_0']
+                q = ob_robot["joint_state"]["position"][0:dof]
+                qdot = ob_robot["joint_state"]["velocity"][0:dof]
+                if self.params["nr_obst"]>0:
+                    self.obstacles = list(ob["robot_0"]["FullSensor"]["obstacles"].values())
                 else:
-                    # --- get action by FPM, sum of dissipative systems ---#
-                    action_combined = qddot_PUMA + action_avoidance
-            else: #otherwise only apply action by PUMA
-                action_combined = qddot_PUMA
+                    self.obstacles = []
 
-            if self.params["mode_env"] is not None:
-                if self.params["mode_env"] == "vel": # todo: fix nicely or mode == "acc"): #mode_NN=="2nd":
-                    action = self.integrate_to_vel(qdot=qdot, action_acc=action_combined, dt=self.params["dt"])
-                    action = np.clip(action, -1*np.array(self.params["vel_limits"]), np.array(self.params["vel_limits"]))
+                # recompute translation to goal pose:
+                goal_pos = [goal_pos[i] + self.params["goal_vel"][i]*self.params["dt"] for i in range(len(goal_pos))]
+                translation_gpu, translation_cpu = normalizations.translation_goal(state_goal=np.append(goal_pos, orientation_goal), goal_NN=goal_NN)
+                energy_regulation_class.relationship_dq_dx(offset_orientation, translation_cpu, self.kuka_kinematics,
+                                                           normalizations, self.fk)
+                pybullet.addUserDebugPoints([goal_pos], [[1, 0, 0]], 5, 0.1)
+
+                # --- end-effector states and normalized states --- #
+                x_t, xee_orientation, _ = self.kuka_kinematics.get_state_task(q, quat_prev, mode_NN=self.params["mode_NN"], qdot=qdot)
+                quat_prev = copy.deepcopy(xee_orientation)
+
+                # --- action by NN --- #
+                time0 = time.perf_counter()
+                qddot_PUMA, transition_info = self.puma_controller.request_PUMA(q=q,
+                                                                                    qdot=qdot,
+                                                                                    x_t=x_t,
+                                                                                    xee_orientation=xee_orientation,
+                                                                                    offset_orientation=offset_orientation,
+                                                                                    translation_cpu=translation_cpu
+                                                                                    )
+
+                if self.params["bool_combined"] == True:
+                    # ----- Fabrics action ----#
+                    action_avoidance, M_avoidance, f_avoidance, qddot_speed = self.fabrics_controller.compute_action_avoidance(q=q, ob_robot=ob_robot)
+
+                    if self.params["bool_energy_regulator"] == True:
+                        weight_attractor = 1.
+                        # ---- get action by CPM via theorem III.5 in https://arxiv.org/pdf/2309.07368.pdf ---#
+                        action_combined = energy_regulation_class.compute_action_theorem_III5(q=q, qdot=qdot,
+                                                                                              qddot_attractor = qddot_PUMA,
+                                                                                              action_avoidance=action_avoidance,
+                                                                                              M_avoidance=M_avoidance,
+                                                                                              transition_info=transition_info,
+                                                                                              weight_attractor=weight_attractor)
+                    else:
+                        # --- get action by FPM, sum of dissipative systems ---#
+                        action_combined = qddot_PUMA + action_avoidance
+                else: #otherwise only apply action by PUMA
+                    action_combined = qddot_PUMA
+
+                if self.params["mode_env"] is not None:
+                    if self.params["mode_env"] == "vel": # todo: fix nicely or mode == "acc"): #mode_NN=="2nd":
+                        action = self.integrate_to_vel(qdot=qdot, action_acc=action_combined, dt=self.params["dt"])
+                        action = np.clip(action, -1*np.array(self.params["vel_limits"]), np.array(self.params["vel_limits"]))
+                    else:
+                        action = action_combined
                 else:
                     action = action_combined
-            else:
-                action = action_combined
-            self.solver_times.append(time.perf_counter() - time0)
-            ob, *_ = self.env.step(action)
+                self.solver_times.append(time.perf_counter() - time0)
+                ob, *_ = self.env.step(action)
 
-            # result analysis:
-            x_ee, _ = self.utils_analysis._request_ee_state(q, quat_prev)
-            xee_list.append(x_ee[0])
-            qdot_diff_list.append(np.mean(np.absolute(qddot_PUMA   - action_combined)))
-            self.IN_COLLISION = self.utils_analysis.check_distance_collision(q=q, obstacles=self.obstacles)
-            self.GOAL_REACHED, error = self.utils_analysis.check_goal_reaching(q, quat_prev, x_goal=goal_pos)
-            if self.GOAL_REACHED:
-                self.time_to_goal = w*self.params["dt"]
-                break
+                # result analysis:
+                x_ee, _ = self.utils_analysis._request_ee_state(q, quat_prev)
+                xee_list.append(x_ee[0])
+                qdot_diff_list.append(np.mean(np.absolute(qddot_PUMA   - action_combined)))
+                self.IN_COLLISION = self.utils_analysis.check_distance_collision(q=q, obstacles=self.obstacles)
+                self.GOAL_REACHED, error = self.utils_analysis.check_goal_reaching(q, quat_prev, x_goal=goal_pos)
+                if self.GOAL_REACHED:
+                    self.time_to_goal = w*self.params["dt"]
+                    break
 
-            if self.IN_COLLISION:
-                self.time_to_goal = float("nan")
-                break
-        self.env.close()
+                if self.IN_COLLISION:
+                    self.time_to_goal = float("nan")
+                    break
+        finally:
+            if video_log_id is not None:
+                pybullet.stopStateLogging(video_log_id)
+            self.env.close()
 
         results = {
             "min_distance": self.utils_analysis.get_min_dist(),
@@ -177,7 +190,10 @@ class example_kuka_TamedPUMA(ExampleGeneric):
         }
         return results
 
-def main(render=True):
+def main(render=True, record_video=False, video_path="simulation_video.mp4"):
+    # MP4 state logging requires a GUI PyBullet connection.
+    if record_video:
+        render = True
     q_init_list = [
         np.array((0.531, 1.36, 0.070, -1.065, 0.294, -1.2, -0.242)),
     ]
@@ -197,7 +213,11 @@ def main(render=True):
     ]
     goal_vel_list[0] = [-0.01, 0., 0.]
     network_yaml = "kuka_TamedPUMA_tomato" # TODO @USER - YAML FILE
-    example_class = example_kuka_TamedPUMA(file_name=network_yaml)
+    example_class = example_kuka_TamedPUMA(
+        file_name=network_yaml,
+        record_video=record_video,
+        video_path=video_path,
+    )
     index = 0
     example_class.overwrite_defaults(params=example_class.params, init_pos=q_init_list[index], positions_obstacles=positions_obstacles_list[index], render=render, speed_obstacles=speed_obstacles_list[index], goal_pos=goal_pos_list[index], goal_vel=goal_vel_list[index])
     example_class.construct_example()
@@ -212,4 +232,23 @@ def main(render=True):
     return {}
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--video",
+        action="store_true",
+        help="Record the run to an MP4 via PyBullet STATE_LOGGING_VIDEO_MP4 (implies GUI render).",
+    )
+    parser.add_argument(
+        "--video-path",
+        default="simulation_video.mp4",
+        help="Output path for --video (default: simulation_video.mp4).",
+    )
+    parser.add_argument(
+        "--no-render",
+        action="store_true",
+        help="Run without PyBullet GUI (disabled if --video is set).",
+    )
+    args = parser.parse_args()
+    main(render=not args.no_render, record_video=args.video, video_path=args.video_path)
