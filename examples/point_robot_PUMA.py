@@ -36,9 +36,11 @@ class example_point_robot_PUMA():
         return action
 
     def stop_when_collided(self, q, obst_struct, w):
-        for i in range(len(obst_struct)):
-            pos_obst = obst_struct[i+3]["position"]
-            radius_obst = obst_struct[i+3]["size"]
+        if not obst_struct:
+            return {}
+        for _obst_id, obst in obst_struct.items():
+            pos_obst = obst["position"]
+            radius_obst = obst["size"]
 
             distance = np.linalg.norm(q[0:2] - pos_obst[0:2]) - radius_obst
             if distance < 0.2 and self.BOOL_COLLISION_CHECK == 0:
@@ -76,8 +78,11 @@ class example_point_robot_PUMA():
         q_list = np.zeros((2, n_steps))
 
         # Parameters
-        params_name = '2nd_order_2D'   # @USER - Set param file name here. Also Adjust params file accordingly.
-        x_t_init = np.array([np.append(ob['robot_0']["joint_state"]["position"][0:2], ob['robot_0']["joint_state"]["velocity"][0:2])]) # initial states
+        params_name = '1st_order_2D'   # @USER - Set param file name here. Also Adjust PARAM file accordingly.
+        if mode_NN == "2nd":
+            x_t_init = np.array([np.append(ob['robot_0']["joint_state"]["position"][0:2], ob['robot_0']["joint_state"]["velocity"][0:2])])
+        else:
+            x_t_init = np.array([ob['robot_0']["joint_state"]["position"][0:2]])  # 1st-order: position only
         # Resolve paths relative to the repository root so examples work
         # regardless of the current working directory.
         results_base_directory = os.path.abspath(
@@ -122,7 +127,10 @@ class example_point_robot_PUMA():
                 q_list[:, w] = q_list[:, self.INT_COLLISION_CHECK-1]
             else:
                q_list[:, w] = q
-            x_t = np.array([np.append(q, qdot)])
+            if mode_NN == "2nd":
+                x_t = np.array([np.append(q, qdot)])
+            else:
+                x_t = np.array([q])  # 1st-order: position only
 
             # --- translate to axis system of NN ---#
             x_t_cpu, x_t_gpu = normalizations.normalize_state_position_to_NN(x_t=x_t, translation_cpu=translation)
@@ -130,14 +138,18 @@ class example_point_robot_PUMA():
             # --- get action by NN --- #
             transition_info = dynamical_system.transition(space='task', x_t=x_t_gpu)
             x_t_NN = transition_info["desired state"]
-            if mode == "acc":
+            if mode_NN == "1st":
+                action_t_gpu = transition_info["desired velocity"]
+            elif mode == "acc":
                 action_t_gpu = transition_info["desired acceleration"]
             else:
                 action_t_gpu = transition_info["desired "+str_mode]
 
             action_safeMP[0:dof] = normalizations.reverse_transformation(action_gpu=action_t_gpu, mode_NN=mode_NN)
             action = self.get_action_in_limits(action_safeMP, mode=mode)
-            self.stop_when_collided(q=q, obst_struct=ob_robot["FullSensor"]["obstacles"], w=w)
+            obstacles_fs = ob_robot.get("FullSensor", {}).get("obstacles") or {}
+            if obstacles_fs:
+                self.stop_when_collided(q=q, obst_struct=obstacles_fs, w=w)
             ob, *_, = env.step(action)
 
             # --- Update plot ---#
@@ -151,10 +163,11 @@ class example_point_robot_PUMA():
 def main(render=True):
     # --- Initial parameters --- #
     mode = "acc"
-    mode_NN = "2nd"
+    mode_NN = "1st" # @USER
     dt = 0.01
     init_pos = np.array([0.0, 0.0])
     goal_pos = [-2.4355761, -7.5252747]
+    with_obstacles = False  # @USER set True to add default spheres and enable collision freeze
 
     dof = 2
     v_min = -50 * np.ones((dof+1,))
@@ -162,13 +175,18 @@ def main(render=True):
     acc_min = -50 * np.ones((dof+1,))
     acc_max = 50 * np.ones((dof+1,))
 
-    # --- generate environment
+    # --- generate environment --- #
     envir_trial = trial_environments()
-    (env, goal) = envir_trial.initalize_environment_pointmass(render, mode=mode, dt=dt, init_pos=init_pos,
-                                                              goal_pos=goal_pos)
+    (env, goal) = envir_trial.initalize_environment_pointmass(
+        render, mode=mode, dt=dt, init_pos=init_pos, goal_pos=goal_pos,
+        with_obstacles=with_obstacles,
+    )
 
     example_class = example_point_robot_PUMA(v_min=v_min, v_max=v_max, acc_min=acc_min, acc_max=acc_max)
-    res = example_class.run_point_robot_urdf(n_steps=1000, env=env, goal=goal, init_pos=init_pos, goal_pos=goal_pos, dt=dt, mode=mode, mode_NN=mode_NN)
+    res = example_class.run_point_robot_urdf(
+        n_steps=1000, env=env, goal=goal, init_pos=init_pos, goal_pos=goal_pos,
+        dt=dt, mode=mode, mode_NN=mode_NN,
+    )
     return {}
 
 if __name__ == "__main__":

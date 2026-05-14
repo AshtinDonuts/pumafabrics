@@ -13,17 +13,24 @@ class trial_environments():
     def __init__(self):
         pass
 
-    def initalize_environment_pointmass(self, render, mode="acc", dt=0.01, init_pos=np.array([-0.9, -0.1, 0.0]), goal_pos=[3.5, 0.5]):
+    def initalize_environment_pointmass(self, \
+                                        render, mode="acc", dt=0.01, \
+                                        init_pos=np.array([-0.9, -0.1, 0.0]), \
+                                        goal_pos=[3.5, 0.5], \
+                                        with_obstacles=False):
         """
         Initializes the simulation environment.
 
-        Adds an obstacle and goal visualizaion to the environment and
-        steps the simulation once.
+        Optionally adds static sphere obstacles and a goal visualization to the
+        environment.
 
         Params
         ----------
         render
             Boolean toggle to set rendering on (True) or off (False).
+        with_obstacles
+            If True, add the default static sphere obstacles. If False, empty
+            scene aside from the robot and goal (no obstacle option).
         """
         robots = [
             GenericUrdfReacher(urdf="pointRobot.urdf", mode=mode),
@@ -76,9 +83,10 @@ class trial_environments():
         env.reset(pos=pos0, vel=vel0)
         env.add_sensor(full_sensor, [0])
         env.add_goal(goal.sub_goals()[0])
-        obstacles = (obst1, obst2) #, obst3)
-        for obst in obstacles:
-            env.add_obstacle(obst)
+        obstacles = (obst1, obst2)  # , obst3)
+        if with_obstacles:
+            for obst in obstacles:
+                env.add_obstacle(obst)
         env.set_spaces()
         return (env, goal)
 

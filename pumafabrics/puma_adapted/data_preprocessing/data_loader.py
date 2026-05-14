@@ -396,7 +396,8 @@ def load_LASA_S2(dataset_path, primitives_names):
     """
     Load LASA S2 models
     """
-    demos, primitive_id = [], []
+    demos, primitive_id, dt = [], [], []
+    dataset_path = os.path.dirname(os.path.abspath(__file__)) + "/../" + copy.deepcopy(dataset_path)
 
     for i in range(len(primitives_names)):
         path = dataset_path + primitives_names[i] + '.txt'
@@ -412,8 +413,9 @@ def load_LASA_S2(dataset_path, primitives_names):
             s = np.array(data['xyz'][j]).T
             demos.append(s)
             primitive_id.append(i)
+            # No per-step dt in JSON; match other loaders (one scalar per step) for eval code paths.
+            dt.append(np.ones(s.shape[1], dtype=np.float64))
 
-    dt = 1
     return demos, primitive_id, dt
 
 

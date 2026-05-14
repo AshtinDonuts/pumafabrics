@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 import numpy as np
+from torch.utils.data import dataset
 
 
 @dataclass
 class Params:
     """ General parameters """
     dataset_name: str = 'LASA_S2'  # selects dataset, options: LASA, LAIR, optitrack, interpolation, joint_space
-    results_path: str = 'results/1st_order_S2/'
+    results_path: str = f'results/1st_order_S2/{dataset_name}/'
     multi_motion: bool = False  # true when learning multiple motions together
     selected_primitives_ids: str = '20'  # id number from dataset_keys.py, e.g., '2' or '4,0,6'
     manifold_dimensions: int = 2  # dimensionality of the data manifold
@@ -34,7 +35,7 @@ class Params:
     """ Training """
     train: bool = True  # true when training
     load_model: bool = False  # true to load previously trained model
-    max_iterations: int = 41000  # maximum number of training iterations
+    max_iterations: int = 5000  # 41000 maximum number of training iterations
 
     """ Preprocessing """
     spline_sample_type: str = 'from data'  # resample from spline type, options: from data, evenly spaced
