@@ -22,11 +22,20 @@ parser.add_argument(
     default=None,
     help='If set, overrides params.boundary_loss_weight after loading the params module.'
 )
+parser.add_argument(
+    '--selected-primitives-ids',
+    type=str,
+    default=None,
+    help='If set, overrides params.selected_primitives_ids (comma-separated indices from '
+         'dataset_keys.py, e.g. "0" or "4,0,6").',
+)
 args = parser.parse_args()
 
 # Import parameters
 Params = getattr(importlib.import_module('params.' + args.params), 'Params')
 params = Params(args.results_base_directory)
+if args.selected_primitives_ids is not None:
+    params.selected_primitives_ids = args.selected_primitives_ids.strip()
 if args.boundary_loss_weight is not None:
     params.boundary_loss_weight = args.boundary_loss_weight
 if args.results_path is not None:

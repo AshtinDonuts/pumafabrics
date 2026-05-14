@@ -7,7 +7,7 @@ class Params:
     dataset_name: str = 'LAIR'  # options: LASA, LAIR, optitrack, interpolation, joint_space
     results_path: str = 'results/2nd_order_2D/'
     multi_motion: bool = False  # true when learning multiple motions together
-    selected_primitives_ids: str = '8'  # id number from dataset_keys.py, e.g., '2' or '4,0,6'
+    selected_primitives_ids: str = '0'  # zero-idx id number from dataset_keys.py, e.g., '2' or '4,0,6'
     manifold_dimensions: int = 2  # dimensionality of the data
     saturate_out_of_boundaries_transitions: bool = True  # True to enforce positively invariant set
     dynamical_system_order: int = 2  # options: 1, 2
@@ -33,7 +33,7 @@ class Params:
     """ Training """
     train: bool = True  # true when training
     load_model: bool = False  # true to load previously trained model
-    max_iterations: int = 41_000  #default: 41000 # maximum number of training iterations
+    max_iterations: int = 5000  #default: 41000 # maximum number of training iterations
 
     """ Preprocessing """
     spline_sample_type: str = 'from data'  # resample from spline type, options: from data, evenly spaced

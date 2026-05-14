@@ -76,7 +76,7 @@ class example_point_robot_PUMA():
         q_list = np.zeros((2, n_steps))
 
         # Parameters
-        params_name = '2nd_order_2D'
+        params_name = '2nd_order_2D'   # @USER - Set param file name here. Also Adjust params file accordingly.
         x_t_init = np.array([np.append(ob['robot_0']["joint_state"]["position"][0:2], ob['robot_0']["joint_state"]["velocity"][0:2])]) # initial states
         # Resolve paths relative to the repository root so examples work
         # regardless of the current working directory.
