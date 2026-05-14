@@ -173,8 +173,10 @@ class Evaluate():
         # Get primitive number to feed model
         primitive_type = torch.ones(self.density ** self.dim_manifold).cuda() * primitive_id
 
-        # Compute evaluation delta t
-        delta_t_eval = np.mean(self.delta_t_eval)
+        # Mean timestep over all demonstrations; per-demo delta_t rows can differ in length
+        # (e.g. LAIR), so np.mean(list_of_1d_arrays) would broadcast instead of averaging.
+        dt_pieces = [np.asarray(d, dtype=np.float64).ravel() for d in self.delta_t_eval]
+        delta_t_eval = float(np.mean(np.concatenate(dt_pieces)))
 
         # Do one transition
         with torch.no_grad():

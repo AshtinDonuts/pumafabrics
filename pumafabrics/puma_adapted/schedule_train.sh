@@ -3,7 +3,7 @@
 # This script launches one training run per entry in PRIMITIVE_IDS (each id is its own run).
 # Example: PRIMITIVE_IDS=(4 0 6) runs three jobs with --selected-primitives-ids 4, then 0, then 6.
 
-PRIMITIVE_IDS=(4 0 6)
+PRIMITIVE_IDS=(0 1 2 3)
 PARAMS_MODULE="1st_order_2D"  # Example: change to the desired params module name
 RESULTS_BASE_DIR="./"  # Base directory for results
 RESULTS_PATH=""  # Optional; leave empty to use default in params module

@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 
+from torch.utils import data
+
 
 @dataclass
 class Params:
     """ General parameters """
-    dataset_name: str = 'LASA'  # selects dataset, options: LASA, LAIR, optitrack, interpolation, joint_space
-    results_path: str = 'results/1st_order_2D/'
+    dataset_name: str = 'LAIR'  # selects dataset, options: LASA, LAIR, optitrack, interpolation, joint_space
+    results_path: str = f'results/1st_order_2D/{dataset_name}/'
     multi_motion: bool = False  # true when learning multiple motions together
     selected_primitives_ids: str = '5'  # id number from dataset_keys.py, e.g., '2' or '4,0,6'
     manifold_dimensions: int = 2  # dimensionality of the data manifold
