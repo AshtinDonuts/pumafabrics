@@ -132,6 +132,13 @@ def run_plot(
         sx, sy = trajectory_to_xy(pts)
         label = os.path.basename(pth) if len(paths) > 1 else f"demo ({os.path.basename(pth)})"
         ax.plot(sx, sy, color=cmap(i % 10), linewidth=2.0, label=label)
+        start_kw: dict = dict(s=70, c="green", edgecolors="darkgreen", linewidths=1.2, zorder=5)
+        end_kw: dict = dict(s=70, c="red", edgecolors="darkred", linewidths=1.2, zorder=5)
+        if i == 0:
+            start_kw["label"] = "start"
+            end_kw["label"] = "end"
+        ax.scatter(sx[0], sy[0], **start_kw)
+        ax.scatter(sx[-1], sy[-1], **end_kw)
     ax.set_aspect("equal", adjustable="box")
     ax.grid(True, alpha=0.3)
     ax.set_xlabel("x")

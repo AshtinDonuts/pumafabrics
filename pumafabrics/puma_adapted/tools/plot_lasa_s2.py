@@ -116,6 +116,13 @@ def run_plot(txt_path: str, title: str | None, savefig: str | None, wireframe: b
     cmap = plt.get_cmap("tab10")
     for i, pts in enumerate(demos):
         ax.plot(pts[:, 0], pts[:, 1], pts[:, 2], color=cmap(i % 10), linewidth=2.0, label=f"demo {i}")
+        start_kw: dict = dict(s=70, c="green", edgecolors="darkgreen", linewidths=1.2, zorder=5)
+        end_kw: dict = dict(s=70, c="red", edgecolors="darkred", linewidths=1.2, zorder=5)
+        if i == 0:
+            start_kw["label"] = "start"
+            end_kw["label"] = "end"
+        ax.scatter(pts[0, 0], pts[0, 1], pts[0, 2], **start_kw)
+        ax.scatter(pts[-1, 0], pts[-1, 1], pts[-1, 2], **end_kw)
 
     lim = 1.05
     ax.set_xlim(-lim, lim)
