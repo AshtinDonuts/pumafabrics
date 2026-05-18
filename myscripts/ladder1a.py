@@ -7,6 +7,7 @@ Trajectories are straight lines in task space converging to x*.
 """
 
 from __future__ import annotations
+from pumafabrics.puma_adapted.tools.animation import TrajectoryPlotter
 
 import argparse
 import os
@@ -19,8 +20,6 @@ import numpy as np
 _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
-
-from pumafabrics.puma_adapted.tools.animation import TrajectoryPlotter
 
 
 class AnalyticStraightLineDS:
@@ -56,7 +55,8 @@ class AnalyticStraightLineDS:
         if x_init.ndim == 1:
             x_init = x_init.reshape(1, -1)
         if x_init.shape[1] != self.dim:
-            raise ValueError(f"x_init has dim {x_init.shape[1]}, expected {self.dim}")
+            raise ValueError(
+                f"x_init has dim {x_init.shape[1]}, expected {self.dim}")
 
         n_traj = x_init.shape[0]
         visited = np.zeros((n_steps + 1, n_traj, self.dim))
@@ -148,7 +148,8 @@ def run_simulation(
     if save_path:
         if fig is None:
             fig = plot_trajectories_static(visited, attractor)
-        os.makedirs(os.path.dirname(os.path.abspath(save_path)) or ".", exist_ok=True)
+        os.makedirs(os.path.dirname(os.path.abspath(save_path))
+                    or ".", exist_ok=True)
         fig.savefig(save_path, bbox_inches="tight")
         print(f"Saved plot to {save_path}")
 
@@ -170,9 +171,12 @@ def parse_args() -> argparse.Namespace:
         metavar=("X", "Y"),
         help="Attractor position x* (default: 0 0).",
     )
-    parser.add_argument("--gain", type=float, default=1.0, help="Convergence rate k.")
-    parser.add_argument("--dt", type=float, default=0.01, help="Integration step size.")
-    parser.add_argument("--steps", type=int, default=2000, help="Number of simulation steps.")
+    parser.add_argument("--gain", type=float, default=1.0,
+                        help="Convergence rate k.")
+    parser.add_argument("--dt", type=float, default=0.01,
+                        help="Integration step size.")
+    parser.add_argument("--steps", type=int, default=2000,
+                        help="Number of simulation steps.")
     parser.add_argument(
         "--no-plot",
         action="store_true",
@@ -181,7 +185,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--save",
         type=str,
-        default=os.path.join(os.path.dirname(__file__), "images", "ladder1a_analytic_ds.png"),
+        default=os.path.join(os.path.dirname(__file__),
+                             "images", "ladder1a_analytic_ds.png"),
         help="Path for output figure.",
     )
     return parser.parse_args()

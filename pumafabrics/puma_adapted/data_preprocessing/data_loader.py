@@ -1,4 +1,4 @@
-from pumafabrics.puma_adapted.datasets.dataset_keys import LASA, LASA_S2, LAIR, ABB_R3S3, kuka, dingo_kinova
+from pumafabrics.puma_adapted.datasets.dataset_keys import LASA, LASA_S2, LAIR, ABB_R3S3, kuka, dingo_kinova, ladder2_line
 import os
 import pickle
 import numpy as np
@@ -198,6 +198,8 @@ def get_dataset_primitives_names(dataset_name):
         dataset_primitives_names = kuka
     elif dataset_name == 'dingo_kinova':
         dataset_primitives_names = dingo_kinova
+    elif dataset_name == 'ladder2_line':
+        dataset_primitives_names = ladder2_line
     else:
         raise NameError('Dataset %s does not exist' % dataset_name)
 
@@ -224,7 +226,7 @@ def get_data_loader(dataset_name, dim_manifold):
     """
     if dataset_name == 'LASA':
         data_loader = load_LASA
-    elif dataset_name == 'LAIR' or dataset_name == 'optitrack' or dataset_name == 'interpolation':
+    elif dataset_name in ('LAIR', 'optitrack', 'interpolation', 'ladder2_line'):
         data_loader = load_numpy_file
     elif dataset_name == 'joint_space':
         data_loader = load_from_dict

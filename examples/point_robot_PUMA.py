@@ -50,7 +50,7 @@ class example_point_robot_PUMA():
                 self.BOOL_COLLISION_CHECK = 1
         return {}
 
-    def run_point_robot_urdf(self, n_steps=2000, env=None, goal=None, init_pos=np.array([-5, 5]), goal_pos=[-2.4355761, -7.5252747], mode="acc", mode_NN="2nd", dt=0.01):
+    def run_point_robot_urdf(self, n_steps=2000, env=None, goal=None, init_pos=np.array([-5, 5]), goal_pos=[-2.4355761, -7.5252747], mode="acc", params_name='1st_order_2D', dt=0.01):
         """
         Set the gym environment, the planner and run point robot example.
         The initial zero action step is needed to initialize the sensor in the
@@ -77,8 +77,8 @@ class example_point_robot_PUMA():
         ob, *_ = env.step(action_safeMP)
         q_list = np.zeros((2, n_steps))
 
-        # Parameters
-        params_name = '2nd_order_2D'   # @USER - Set param file name here. Also Adjust PARAM file accordingly.
+        # Derive dynamical system order from the chosen params module name.
+        mode_NN = "2nd" if "2nd_order" in params_name else "1st"
         if mode_NN == "2nd":
             x_t_init = np.array([np.append(ob['robot_0']["joint_state"]["position"][0:2], ob['robot_0']["joint_state"]["velocity"][0:2])])
         else:
@@ -88,6 +88,9 @@ class example_point_robot_PUMA():
         results_base_directory = os.path.abspath(
             os.path.join(os.path.dirname(__file__), '..')
         ) + '/'
+        examples_dir = os.path.dirname(os.path.abspath(__file__))
+        images_dir = os.path.join(examples_dir, 'images')
+        os.makedirs(images_dir, exist_ok=True)
 
         # Load parameters
         Params = getattr(importlib.import_module('pumafabrics.puma_adapted.params.' + params_name), 'Params')
@@ -154,16 +157,16 @@ class example_point_robot_PUMA():
 
             # --- Update plot ---#
             trajectory_plotter.update(x_t_gpu.T.cpu().detach().numpy())
-        plt.savefig("../examples/images/point_robot_PUMA")
+        plt.savefig(os.path.join(images_dir, 'point_robot_PUMA.png'))
         env.close()
-        make_plots = plotting_functions(results_path="../examples/images/")
+        make_plots = plotting_functions(results_path=images_dir + os.sep)
         make_plots.plotting_q_values(q_list, dt=dt, q_start=q_list[:, 0], q_goal=np.array(goal_pos), file_name="point_robot_q_PUMA")
         return q_list
 
 def main(render=True):
     # --- Initial parameters --- #
+    params_name = '1st_order_2D'  # @USER: '1st_order_2D' or '2nd_order_2D' — controls the model order
     mode = "acc"
-    mode_NN = "2nd" # @ USER - 1st or 2nd
     dt = 0.01
     init_pos = np.array([0.0, 0.0])
     goal_pos = [-2.4355761, -7.5252747]
@@ -185,7 +188,7 @@ def main(render=True):
     example_class = example_point_robot_PUMA(v_min=v_min, v_max=v_max, acc_min=acc_min, acc_max=acc_max)
     res = example_class.run_point_robot_urdf(
         n_steps=1000, env=env, goal=goal, init_pos=init_pos, goal_pos=goal_pos,
-        dt=dt, mode=mode, mode_NN=mode_NN,
+        dt=dt, mode=mode, params_name=params_name,
     )
     return {}
 

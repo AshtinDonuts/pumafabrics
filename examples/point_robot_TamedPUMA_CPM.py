@@ -197,16 +197,27 @@ class example_point_robot_TamedPUMA_CPM():
             xddot_safeMP = normalizations.reverse_transformation(action_gpu=xddot_t_NN, mode_NN="2nd")
 
             # --- get action by fabrics --- #
+            # FullSensor only includes obstacles when they exist in the scene;
+            # body IDs are PyBullet handles, so take the first two by sorted id.
+            full_sense = ob_robot["FullSensor"]
+            obstacles_fs = full_sense.get("obstacles") or {}
+            obst_ids = sorted(obstacles_fs.keys())[:2]
+            if len(obst_ids) < 2:
+                raise KeyError(
+                    "FullSensor has fewer than 2 obstacles; call "
+                    "initalize_environment_pointmass(..., with_obstacles=True)."
+                )
+            id0, id1 = obst_ids[0], obst_ids[1]
             arguments_dict = dict(
                 q=ob_robot["joint_state"]["position"][0:dof],
                 qdot=ob_robot["joint_state"]["velocity"][0:dof],
-                x_goal_0=ob_robot['FullSensor']['goals'][2]['position'][0:dof],
-                weight_goal_0=ob_robot['FullSensor']['goals'][2]['weight'],
-                x_obst_0=ob_robot['FullSensor']['obstacles'][3]['position'],
-                radius_obst_0=ob_robot['FullSensor']['obstacles'][3]['size'],
-                x_obst_1=ob_robot['FullSensor']['obstacles'][4]['position'],
-                radius_obst_1=ob_robot['FullSensor']['obstacles'][4]['size'],
-                radius_body_base_link_y=np.array([0.2])
+                x_goal_0=full_sense["goals"][2]["position"][0:dof],
+                weight_goal_0=full_sense["goals"][2]["weight"],
+                x_obst_0=obstacles_fs[id0]["position"],
+                radius_obst_0=obstacles_fs[id0]["size"],
+                x_obst_1=obstacles_fs[id1]["position"],
+                radius_obst_1=obstacles_fs[id1]["size"],
+                radius_body_base_link_y=np.array([0.2]),
             )
             action_fabrics[0:dof] = planner.compute_action(**arguments_dict)
             M, f, action_forced, xddot_speed = planner.compute_M_f_action_avoidance(**arguments_dict)
@@ -259,8 +270,14 @@ def main(render=True):
 
     # --- generate environment ---#
     envir_trial = trial_environments()
-    (env, goal) = envir_trial.initalize_environment_pointmass(render, mode=mode, dt=dt, init_pos=init_pos,
-                                                              goal_pos=goal_pos)
+    (env, goal) = envir_trial.initalize_environment_pointmass(
+        render,
+        mode=mode,
+        dt=dt,
+        init_pos=init_pos,
+        goal_pos=goal_pos,
+        with_obstacles=True,
+    )
 
     # --- run example ---#
     example_class = example_point_robot_TamedPUMA_CPM(v_min=v_min, v_max=v_max, acc_min=acc_min, acc_max=acc_max)

@@ -9,6 +9,7 @@ straight lines converging to q* with v -> 0.
 """
 
 from __future__ import annotations
+from pumafabrics.puma_adapted.tools.animation import TrajectoryPlotter
 
 import argparse
 import os
@@ -20,8 +21,6 @@ import numpy as np
 _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
-
-from pumafabrics.puma_adapted.tools.animation import TrajectoryPlotter
 
 
 class AnalyticStraightLineDS2ndOrder:
@@ -44,7 +43,7 @@ class AnalyticStraightLineDS2ndOrder:
     def split_state(self, state: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         state = np.asarray(state, dtype=float)
         q = state[..., : self.dim]
-        v = state[..., self.dim :]
+        v = state[..., self.dim:]
         return q, v
 
     def stack_state(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
@@ -163,7 +162,8 @@ def run_simulation(
     pause_time: float = 1e-5,
     save_path: str | None = None,
 ) -> np.ndarray:
-    ds = AnalyticStraightLineDS2ndOrder(attractor=attractor, kp=kp, kd=kd, dt=dt)
+    ds = AnalyticStraightLineDS2ndOrder(
+        attractor=attractor, kp=kp, kd=kd, dt=dt)
     visited = ds.simulate(state_init, n_steps)
     visited_pos = ds.positions(visited)
     pos_init = state_init[:, : ds.dim]
@@ -187,7 +187,8 @@ def run_simulation(
     if save_path:
         if fig is None:
             fig = plot_trajectories_static(visited_pos, attractor)
-        os.makedirs(os.path.dirname(os.path.abspath(save_path)) or ".", exist_ok=True)
+        os.makedirs(os.path.dirname(os.path.abspath(save_path))
+                    or ".", exist_ok=True)
         fig.savefig(save_path, bbox_inches="tight")
         print(f"Saved plot to {save_path}")
 
@@ -209,15 +210,18 @@ def parse_args() -> argparse.Namespace:
         metavar=("X", "Y"),
         help="Attractor position q* (default: 0 0).",
     )
-    parser.add_argument("--kp", type=float, default=1.0, help="Position gain k_p.")
+    parser.add_argument("--kp", type=float, default=1.0,
+                        help="Position gain k_p.")
     parser.add_argument(
         "--kd",
         type=float,
         default=None,
         help="Velocity gain k_d (default: 2*sqrt(k_p), critical damping).",
     )
-    parser.add_argument("--dt", type=float, default=0.01, help="Integration step size.")
-    parser.add_argument("--steps", type=int, default=2000, help="Number of simulation steps.")
+    parser.add_argument("--dt", type=float, default=0.01,
+                        help="Integration step size.")
+    parser.add_argument("--steps", type=int, default=2000,
+                        help="Number of simulation steps.")
     parser.add_argument(
         "--no-plot",
         action="store_true",
@@ -226,7 +230,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--save",
         type=str,
-        default=os.path.join(os.path.dirname(__file__), "images", "ladder1b_analytic_ds_2nd_order.png"),
+        default=os.path.join(os.path.dirname(__file__),
+                             "images", "ladder1b_analytic_ds_2nd_order.png"),
         help="Path for output figure.",
     )
     return parser.parse_args()
@@ -248,7 +253,8 @@ def main() -> None:
         save_path=args.save,
     )
 
-    ds = AnalyticStraightLineDS2ndOrder(attractor=attractor, kp=args.kp, kd=args.kd, dt=args.dt)
+    ds = AnalyticStraightLineDS2ndOrder(
+        attractor=attractor, kp=args.kp, kd=args.kd, dt=args.dt)
     q_final, v_final = ds.split_state(visited[-1])
     pos_err = np.max(np.linalg.norm(q_final - attractor, axis=1))
     vel_err = np.max(np.linalg.norm(v_final, axis=1))

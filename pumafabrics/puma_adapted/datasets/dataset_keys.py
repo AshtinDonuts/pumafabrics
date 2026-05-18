@@ -105,6 +105,10 @@ kuka = ['pouring',
 dingo_kinova = ['kinova_6feb_pick',
                 'dinova_30jan_pick']
 
+# Ladder step 2: single straight-line demonstration (see myscripts/ladder2_data.py)
+ladder2_line = ['straight_line']
+
 dataset_keys_dic = {'LASA': LASA,
                     'LAIR': LAIR,
-                    'LASA_S2': LASA_S2}
+                    'LASA_S2': LASA_S2,
+                    'ladder2_line': ladder2_line}
