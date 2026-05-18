@@ -148,7 +148,7 @@ def _denormalize_positions(pos_norm: np.ndarray, data: dict) -> np.ndarray:
     x_min = np.asarray(data["x min"]).reshape(-1)
     x_max = np.asarray(data["x max"]).reshape(-1)
     flat = pos_norm.reshape(-1, pos_norm.shape[-1])
-    flat = denormalize_state(flat.T, x_min, x_max).T
+    flat = denormalize_state(flat, x_min, x_max)
     return flat.reshape(pos_norm.shape)
 
 
