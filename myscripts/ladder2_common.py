@@ -13,6 +13,7 @@ from typing import Literal
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from torch.utils.tensorboard import SummaryWriter
 
 _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if _REPO_ROOT not in sys.path:
@@ -44,7 +45,8 @@ def repo_results_base() -> str:
 
 
 def model_checkpoint_path(params) -> str:
-    return params.results_path + params.selected_primitives_ids + "/model"
+    """Checkpoint path (params.results_path already ends with `<primitive_id>/`)."""
+    return os.path.join(params.results_path, "model")
 
 
 def build_params(order: OrderTag, load_model: bool = False, train: bool = True):
@@ -81,23 +83,42 @@ def train_learned_ds(
 
     learner, evaluator, data = initialize_framework(params, params_name, verbose=verbose)
 
+    log_name = f"{params_name}_{params.selected_primitives_ids}"
+    writer = SummaryWriter(log_dir=os.path.join(repo_results_base(), "results", "tensorboard_runs", log_name))
+
     if verbose:
         print(f"Training {params_name} for up to {params.max_iterations} iterations...")
+        print(f"Results path: {params.results_path}")
     t0 = time.perf_counter()
     for iteration in range(params.max_iterations + 1):
         if iteration % params.evaluation_interval == 0:
             metrics_acc, metrics_stab = evaluator.run(iteration=iteration)
+
+            if params.save_evaluation:
+                evaluator.save_progress(params.results_path, iteration, learner.model, writer)
+
             if verbose:
                 print(
                     f"  iter {iteration}: metric sum={metrics_acc['metrics sum']:.4f}, "
                     f"spurious={metrics_stab['n spurious']}",
                 )
-        learner.train_step()
-        if verbose and iteration % 500 == 0 and iteration > 0:
-            print(f"  iter {iteration}...")
+
+        loss, loss_list, losses_names = learner.train_step()
+
+        if verbose and iteration % 10 == 0:
+            print(f"  iter {iteration}: total cost={loss.item():.6f}")
+
+        for j in range(len(losses_names)):
+            writer.add_scalar("losses/" + losses_names[j], loss_list[j], iteration)
+
     if verbose:
         print(f"Training finished in {time.perf_counter() - t0:.1f}s")
 
+    writer.close()
+
+    # Persist final weights (train.py only saves via save_progress on best eval;
+    # this guarantees a loadable checkpoint after a full run).
+    os.makedirs(params.results_path, exist_ok=True)
     torch.save(learner.model.state_dict(), ckpt)
     if verbose:
         print(f"Saved model to {ckpt}")

@@ -39,5 +39,5 @@ python3 myscripts/ladder2b.py --no-plot
 python3 myscripts/ladder2a.py --simulate-only --no-plot
 ```
 
-Checkpoints: `results/ladder2_1st_order_2D/ladder2_line/0/model` and
-`results/ladder2_2nd_order_2D/ladder2_line/0/model` under the repo root.
+Checkpoints (after a successful run): `results/ladder2_1st_order_2D/ladder2_line/0/model`
+and `results/ladder2_2nd_order_2D/ladder2_line/0/model` under the repo root.

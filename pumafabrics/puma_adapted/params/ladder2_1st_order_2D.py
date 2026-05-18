@@ -39,7 +39,7 @@ class Params:
     trajectories_resample_length: int = 2000
     state_increment: float = 0.3
 
-    save_evaluation: bool = False
+    save_evaluation: bool = True
     evaluation_interval: int = 3000
     quanti_eval: bool = True
     quali_eval: bool = False
