@@ -41,3 +41,29 @@ python3 myscripts/ladder2a.py --simulate-only --no-plot
 
 Checkpoints (after a successful run): `results/ladder2_1st_order_2D/ladder2_line/0/model`
 and `results/ladder2_2nd_order_2D/ladder2_line/0/model` under the repo root.
+
+### Step 3 — learned DS on one curved non-self-intersecting trajectory
+Scripts `ladder3a` (1st order) and `ladder3b` (2nd order) train PUMA on demo 0 from
+`pumafabrics/puma_adapted/datasets/LASA/heee.mat` (exported to `ladder3_heee/`), then
+simulate from a grid of initials.
+
+```bash
+# Create / refresh the demonstration .npy
+python3 myscripts/ladder3_data.py
+
+# Train + simulate (GPU recommended; ~12k iterations by default)
+python3 myscripts/ladder3a.py --no-plot
+python3 myscripts/ladder3b.py --no-plot
+
+# Re-simulate an existing checkpoint
+python3 myscripts/ladder3a.py --simulate-only --no-plot
+
+# Continue training (e.g. 12000 -> 24000); loads weights and resumes automatically
+python3 myscripts/ladder3b.py --max-iterations 24000 --train-only --no-plot
+
+# Restart training from scratch (ignores checkpoint)
+python3 myscripts/ladder3b.py --force-train --max-iterations 24000 --no-plot
+```
+
+Checkpoints (after a successful run): `results/ladder3_1st_order_2D/ladder3_heee/0/model`
+and `results/ladder3_2nd_order_2D/ladder3_heee/0/model` under the repo root.

@@ -45,7 +45,7 @@ def parse_args() -> argparse.Namespace:
         "--max-iterations",
         type=int,
         default=None,
-        help="Override params.max_iterations.",
+        help="Target iteration count; resumes from checkpoint if higher than last run.",
     )
     parser.add_argument("--steps", type=int, default=2000, help="Simulation steps.")
     parser.add_argument(

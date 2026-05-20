@@ -108,7 +108,11 @@ dingo_kinova = ['kinova_6feb_pick',
 # Ladder step 2: single straight-line demonstration (see myscripts/ladder2_data.py)
 ladder2_line = ['straight_line']
 
+# Ladder step 3: single curved heee demo (see myscripts/ladder3_data.py)
+ladder3_heee = ['heee']
+
 dataset_keys_dic = {'LASA': LASA,
                     'LAIR': LAIR,
                     'LASA_S2': LASA_S2,
-                    'ladder2_line': ladder2_line}
+                    'ladder2_line': ladder2_line,
+                    'ladder3_heee': ladder3_heee}

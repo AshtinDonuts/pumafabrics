@@ -1,8 +1,8 @@
 """
-Ladder step 2a: learned 1st-order DS from one straight-line demonstration.
+Ladder step 3a: learned 1st-order DS from one curved heee demonstration.
 
-Trains PUMA on a synthetic line segment, then simulates the learned field from a
-grid of initial positions (compare with ladder1a analytic baseline).
+Trains PUMA on LASA heee demo 0, then simulates the learned field from a grid of
+initial positions (compare with ladder2a straight-line demo).
 """
 
 from __future__ import annotations
@@ -19,12 +19,12 @@ _MYSCRIPTS = os.path.dirname(os.path.abspath(__file__))
 if _MYSCRIPTS not in sys.path:
     sys.path.insert(0, _MYSCRIPTS)
 
-from ladder2_common import run_learned_ds_pipeline
+from ladder3_common import run_learned_ds_pipeline
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Ladder 2a: learned 1st-order DS on one straight-line demo.",
+        description="Ladder 3a: learned 1st-order DS on one curved heee demo.",
     )
     parser.add_argument(
         "--train-only",
@@ -47,7 +47,7 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Target iteration count; resumes from checkpoint if higher than last run.",
     )
-    parser.add_argument("--steps", type=int, default=2000, help="Simulation steps.")
+    parser.add_argument("--steps", type=int, default=4000, help="Simulation steps.")
     parser.add_argument(
         "--no-plot",
         action="store_true",
@@ -56,7 +56,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--save",
         type=str,
-        default=os.path.join(os.path.dirname(__file__), "images", "ladder2a_learned_ds.png"),
+        default=os.path.join(os.path.dirname(__file__), "images", "ladder3a_learned_ds.png"),
         help="Output figure path.",
     )
     return parser.parse_args()

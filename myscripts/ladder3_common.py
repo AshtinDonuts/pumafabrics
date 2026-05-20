@@ -1,5 +1,5 @@
 """
-Shared utilities for ladder step 2: learned DS from one straight-line demonstration.
+Shared utilities for ladder step 3: learned DS from one curved heee demonstration.
 
 Training delegates to ``pumafabrics.puma_adapted.train``; this module handles dataset
 setup, checkpoint policy, grid simulation, and plotting.
@@ -30,20 +30,18 @@ _MYSCRIPTS = os.path.dirname(os.path.abspath(__file__))
 if _MYSCRIPTS not in sys.path:
     sys.path.insert(0, _MYSCRIPTS)
 
-from ladder1a import default_initial_states as default_initial_positions
-from ladder1b import default_initial_states as default_initial_states_2nd_order
-from ladder2_data import ensure_straight_line_dataset, load_demonstration_xy
+from ladder3_data import ensure_heee_dataset
 
 OrderTag = Literal["1st", "2nd"]
 
 PARAMS_BY_ORDER: dict[OrderTag, str] = {
-    "1st": "ladder2_1st_order_2D",
-    "2nd": "ladder2_2nd_order_2D",
+    "1st": "ladder3_1st_order_2D",
+    "2nd": "ladder3_2nd_order_2D",
 }
 
 PLOT_TITLE_BY_ORDER: dict[OrderTag, str] = {
-    "1st": "Learned 1st-order DS (straight-line demo)",
-    "2nd": "Learned 2nd-order DS (straight-line demo)",
+    "1st": "Learned 1st-order DS (heee curved demo)",
+    "2nd": "Learned 2nd-order DS (heee curved demo)",
 }
 
 
@@ -72,7 +70,10 @@ def tensorboard_log_dir(params_name: str, selected_primitives_ids: str) -> str:
 
 
 def read_last_training_iteration(results_path: str) -> int | None:
-    """Last completed iteration from training summary or eval images."""
+    """
+    Last completed evaluation iteration from ``training_evaluation_summary.txt``,
+    or the highest ``primitive_*_iter_*.pdf`` index under ``images/``.
+    """
     last: int | None = None
     summary = os.path.join(results_path, "training_evaluation_summary.txt")
     if os.path.isfile(summary):
@@ -113,11 +114,11 @@ def train_learned_ds(
     verbose: bool = True,
 ) -> tuple[object, object, dict, str]:
     """
-    Train (or load) a PUMA model on the single straight-line demonstration.
+    Train (or load) a PUMA model on the single curved heee demonstration.
 
     Returns learner, evaluator, data, params_module_name.
     """
-    ensure_straight_line_dataset()
+    ensure_heee_dataset()
     params, params_name = build_params(order, load_model=False, train=True)
     if max_iterations is not None:
         params.max_iterations = max_iterations
@@ -167,7 +168,7 @@ def train_learned_ds(
 
 
 def load_learned_ds(order: OrderTag, verbose: bool = False):
-    ensure_straight_line_dataset()
+    ensure_heee_dataset()
     params, params_name = build_params(order, load_model=True, train=False)
     ckpt = model_checkpoint_path(params)
     if not os.path.isfile(ckpt):
@@ -178,10 +179,58 @@ def load_learned_ds(order: OrderTag, verbose: bool = False):
     return learner, evaluator, data, params_name
 
 
-def initial_states_for_order(order: OrderTag) -> np.ndarray:
+def workspace_initial_positions(
+    x_min: np.ndarray,
+    x_max: np.ndarray,
+    *,
+    nx: int = 4,
+    ny: int = 3,
+    margin: float = 0.12,
+) -> np.ndarray:
+    """
+    Grid of 2D positions inset within PUMA workspace bounds (same count as ladder1a).
+    """
+    x_min = np.asarray(x_min, dtype=float).reshape(-1)
+    x_max = np.asarray(x_max, dtype=float).reshape(-1)
+    span = x_max - x_min
+    lo = x_min + margin * span
+    hi = x_max - margin * span
+    xs = np.linspace(lo[0], hi[0], nx)
+    ys = np.linspace(lo[1], hi[1], ny)
+    xx, yy = np.meshgrid(xs, ys)
+    return np.column_stack([xx.ravel(), yy.ravel()])
+
+
+def initial_states_for_order(order: OrderTag, data: dict) -> np.ndarray:
+    """Initial states spanning the demonstration workspace (from training bounds)."""
+    positions = workspace_initial_positions(data["x min"], data["x max"])
     if order == "1st":
-        return default_initial_positions()
-    return default_initial_states_2nd_order()
+        return positions
+    velocities = np.zeros_like(positions)
+    return np.hstack([positions, velocities])
+
+
+def demonstration_xy_from_data(data: dict, demo_index: int = 0) -> np.ndarray:
+    """Demonstration positions in task space (T, 2), same frame as simulation."""
+    raw = np.asarray(data["demonstrations raw"][demo_index], dtype=float)
+    if raw.ndim == 2 and raw.shape[0] == 2:
+        return raw.T
+    return np.asarray(raw, dtype=float).reshape(-1, 2)
+
+
+def _axis_limits(
+    demo_xy: np.ndarray,
+    visited_pos: np.ndarray,
+    *,
+    buffer: float = 0.05,
+) -> tuple[tuple[float, float], tuple[float, float]]:
+    xs = np.concatenate([demo_xy[:, 0], visited_pos[:, :, 0].ravel()])
+    ys = np.concatenate([demo_xy[:, 1], visited_pos[:, :, 1].ravel()])
+    x_span = xs.max() - xs.min()
+    y_span = ys.max() - ys.min()
+    pad_x = buffer * (x_span if x_span > 0 else 1.0)
+    pad_y = buffer * (y_span if y_span > 0 else 1.0)
+    return (xs.min() - pad_x, xs.max() + pad_x), (ys.min() - pad_y, ys.max() + pad_y)
 
 
 def _denormalize_positions(pos_norm: np.ndarray, data: dict) -> np.ndarray:
@@ -200,7 +249,7 @@ def simulate_learned_ds(
     delta_t: float = 0.1,
 ) -> np.ndarray:
     """Roll out learned DS; returns denormalized position history (T+1, n_traj, 2)."""
-    state_init = initial_states_for_order(order)
+    state_init = initial_states_for_order(order, data)
     x_min = data["x min"]
     x_max = data["x max"]
     from pumafabrics.puma_adapted.agent.utils.dynamical_system_operations import normalize_state
@@ -266,6 +315,9 @@ def plot_learned_ds_static(
             zorder=10,
         )
     ax.plot(goal[0], goal[1], "g*", markersize=15, label="Goal", zorder=12)
+    xlim, ylim = _axis_limits(demonstration_xy, visited_pos)
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
     ax.set_xlabel("$x$")
     ax.set_ylabel("$y$")
     ax.set_title(title)
@@ -273,6 +325,17 @@ def plot_learned_ds_static(
     ax.legend(loc="best")
     ax.set_aspect("equal", adjustable="box")
     return fig
+
+
+def _overlay_demonstration_on_axes(ax: plt.Axes, demonstration_xy: np.ndarray) -> None:
+    ax.plot(
+        demonstration_xy[:, 0],
+        demonstration_xy[:, 1],
+        color="lightgray",
+        linewidth=6,
+        label="Demonstration",
+        zorder=5,
+    )
 
 
 def run_learned_ds_pipeline(
@@ -298,7 +361,7 @@ def run_learned_ds_pipeline(
         learner, _, data, _ = load_learned_ds(order)
 
     goal = np.asarray(data["goals"][0], dtype=float).reshape(-1)
-    demo_xy = load_demonstration_xy()
+    demo_xy = demonstration_xy_from_data(data)
     visited_pos = None
     if simulate:
         visited_pos = simulate_learned_ds(learner, data, order, n_steps=n_steps)
@@ -306,21 +369,26 @@ def run_learned_ds_pipeline(
     title = PLOT_TITLE_BY_ORDER[order]
     fig = None
     if simulate and live_plot:
-        pos_init = initial_states_for_order(order)
-        if order == "2nd":
-            pos_init = pos_init[:, :2]
-        fig, ax = plt.subplots()
-        fig.set_size_inches(8, 8)
+        fig = plt.figure(figsize=(8, 8))
         fig.show()
-        plotter = TrajectoryPlotter(fig, x0=pos_init.T, pause_time=pause_time, goal=goal)
-        for t in range(visited_pos.shape[0]):
+        plotter = TrajectoryPlotter(
+            fig,
+            x0=visited_pos[0].T,
+            pause_time=pause_time,
+            goal=goal,
+        )
+        _overlay_demonstration_on_axes(plotter._ax, demo_xy)
+        plotter._ax.set_title(title)
+        xlim, ylim = _axis_limits(demo_xy, visited_pos)
+        plotter._ax.set_xlim(xlim)
+        plotter._ax.set_ylim(ylim)
+        for t in range(1, visited_pos.shape[0]):
             plotter.update(visited_pos[t].T)
-    elif simulate and save_path:
-        fig = plot_learned_ds_static(visited_pos, demo_xy, goal, title)
-
+            plotter._ax.set_xlim(xlim)
+            plotter._ax.set_ylim(ylim)
+        plotter.draw()
     if simulate and save_path:
-        if fig is None:
-            fig = plot_learned_ds_static(visited_pos, demo_xy, goal, title)
+        fig = plot_learned_ds_static(visited_pos, demo_xy, goal, title)
         os.makedirs(os.path.dirname(os.path.abspath(save_path)) or ".", exist_ok=True)
         fig.savefig(save_path, bbox_inches="tight")
         print(f"Saved plot to {save_path}")

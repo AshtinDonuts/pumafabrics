@@ -59,10 +59,16 @@ def run_training(
     params_module_name: str,
     *,
     tensorboard_log_dir: Optional[str] = None,
+    start_iteration: int = 0,
     verbose: bool = True,
 ) -> tuple[Any, Any, dict, float]:
     """
     Run the standard PUMA training loop.
+
+    Parameters
+    ----------
+    start_iteration : int
+        First iteration index to run (use > 0 with ``params.load_model=True`` to resume).
 
     Returns (learner, evaluator, data, elapsed_seconds).
     """
@@ -74,11 +80,17 @@ def run_training(
     writer = SummaryWriter(log_dir=tensorboard_log_dir)
 
     if verbose:
-        print(f"Training {params_module_name} for up to {params.max_iterations} iterations...")
+        if start_iteration > 0:
+            print(
+                f"Resuming {params_module_name} from iteration {start_iteration} "
+                f"to {params.max_iterations}...",
+            )
+        else:
+            print(f"Training {params_module_name} for up to {params.max_iterations} iterations...")
         print(f"Results path: {params.results_path}")
 
     t0 = time.perf_counter()
-    for iteration in range(params.max_iterations + 1):
+    for iteration in range(start_iteration, params.max_iterations + 1):
         if iteration % params.evaluation_interval == 0:
             metrics_acc, metrics_stab = evaluator.run(iteration=iteration)
 
