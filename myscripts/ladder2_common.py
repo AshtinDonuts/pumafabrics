@@ -1,19 +1,19 @@
 """
 Shared utilities for ladder step 2: learned DS from one straight-line demonstration.
+
+Training delegates to ``pumafabrics.puma_adapted.train``; this module handles dataset
+setup, checkpoint policy, grid simulation, and plotting.
 """
 
 from __future__ import annotations
 
-import importlib
 import os
 import sys
-import time
 from typing import Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from torch.utils.tensorboard import SummaryWriter
 
 _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if _REPO_ROOT not in sys.path:
@@ -23,6 +23,7 @@ from pumafabrics.puma_adapted.agent.neural_network import DEVICE
 from pumafabrics.puma_adapted.agent.utils.dynamical_system_operations import denormalize_state
 from pumafabrics.puma_adapted.initializer import initialize_framework
 from pumafabrics.puma_adapted.tools.animation import TrajectoryPlotter
+from pumafabrics.puma_adapted.train import configure_params, run_training
 
 _MYSCRIPTS = os.path.dirname(os.path.abspath(__file__))
 if _MYSCRIPTS not in sys.path:
@@ -39,24 +40,47 @@ PARAMS_BY_ORDER: dict[OrderTag, str] = {
     "2nd": "ladder2_2nd_order_2D",
 }
 
+PLOT_TITLE_BY_ORDER: dict[OrderTag, str] = {
+    "1st": "Learned 1st-order DS (straight-line demo)",
+    "2nd": "Learned 2nd-order DS (straight-line demo)",
+}
+
 
 def repo_results_base() -> str:
     return _REPO_ROOT + os.sep
 
 
 def model_checkpoint_path(params) -> str:
-    """Checkpoint path (params.results_path already ends with `<primitive_id>/`)."""
+    """Checkpoint path (params.results_path already ends with ``<primitive_id>/``)."""
     return os.path.join(params.results_path, "model")
 
 
 def build_params(order: OrderTag, load_model: bool = False, train: bool = True):
-    module_name = f"pumafabrics.puma_adapted.params.{PARAMS_BY_ORDER[order]}"
-    Params = getattr(importlib.import_module(module_name), "Params")
-    params = Params(repo_results_base())
-    params.results_path += params.selected_primitives_ids + "/"
+    params, params_name = configure_params(
+        PARAMS_BY_ORDER[order],
+        repo_results_base(),
+    )
     params.load_model = load_model
     params.train = train
-    return params, PARAMS_BY_ORDER[order]
+    return params, params_name
+
+
+def tensorboard_log_dir(params_name: str, selected_primitives_ids: str) -> str:
+    log_name = f"{params_name}_{selected_primitives_ids}"
+    return os.path.join(repo_results_base(), "results", "tensorboard_runs", log_name)
+
+
+def save_final_checkpoint(learner, ckpt: str, verbose: bool = True) -> None:
+    """
+    Persist weights after a full training run.
+
+    ``train.run_training`` only saves via evaluator on best metric; this guarantees a
+    loadable ``model`` file for ``--simulate-only``.
+    """
+    os.makedirs(os.path.dirname(ckpt) or ".", exist_ok=True)
+    torch.save(learner.model.state_dict(), ckpt)
+    if verbose:
+        print(f"Saved model to {ckpt}")
 
 
 def train_learned_ds(
@@ -79,50 +103,15 @@ def train_learned_ds(
     if os.path.isfile(ckpt) and not force:
         if verbose:
             print(f"Checkpoint exists at {ckpt}; use --force-train to retrain.")
-        return load_learned_ds(order)
+        return load_learned_ds(order, verbose=verbose)
 
-    learner, evaluator, data = initialize_framework(params, params_name, verbose=verbose)
-
-    log_name = f"{params_name}_{params.selected_primitives_ids}"
-    writer = SummaryWriter(log_dir=os.path.join(repo_results_base(), "results", "tensorboard_runs", log_name))
-
-    if verbose:
-        print(f"Training {params_name} for up to {params.max_iterations} iterations...")
-        print(f"Results path: {params.results_path}")
-    t0 = time.perf_counter()
-    for iteration in range(params.max_iterations + 1):
-        if iteration % params.evaluation_interval == 0:
-            metrics_acc, metrics_stab = evaluator.run(iteration=iteration)
-
-            if params.save_evaluation:
-                evaluator.save_progress(params.results_path, iteration, learner.model, writer)
-
-            if verbose:
-                print(
-                    f"  iter {iteration}: metric sum={metrics_acc['metrics sum']:.4f}, "
-                    f"spurious={metrics_stab['n spurious']}",
-                )
-
-        loss, loss_list, losses_names = learner.train_step()
-
-        if verbose and iteration % 10 == 0:
-            print(f"  iter {iteration}: total cost={loss.item():.6f}")
-
-        for j in range(len(losses_names)):
-            writer.add_scalar("losses/" + losses_names[j], loss_list[j], iteration)
-
-    if verbose:
-        print(f"Training finished in {time.perf_counter() - t0:.1f}s")
-
-    writer.close()
-
-    # Persist final weights (train.py only saves via save_progress on best eval;
-    # this guarantees a loadable checkpoint after a full run).
-    os.makedirs(params.results_path, exist_ok=True)
-    torch.save(learner.model.state_dict(), ckpt)
-    if verbose:
-        print(f"Saved model to {ckpt}")
-
+    learner, evaluator, data, _ = run_training(
+        params,
+        params_name,
+        tensorboard_log_dir=tensorboard_log_dir(params_name, params.selected_primitives_ids),
+        verbose=verbose,
+    )
+    save_final_checkpoint(learner, ckpt, verbose=verbose)
     return learner, evaluator, data, params_name
 
 
@@ -163,7 +152,6 @@ def simulate_learned_ds(
     state_init = initial_states_for_order(order)
     x_min = data["x min"]
     x_max = data["x max"]
-    # Grid initials are in task space; DS integrates in normalized coordinates.
     from pumafabrics.puma_adapted.agent.utils.dynamical_system_operations import normalize_state
 
     if order == "1st":
@@ -251,7 +239,9 @@ def run_learned_ds_pipeline(
     """Train (optional), simulate, and plot learned DS."""
     if train:
         learner, _, data, _ = train_learned_ds(
-            order, max_iterations=max_iterations, force=force_train,
+            order,
+            max_iterations=max_iterations,
+            force=force_train,
         )
     else:
         learner, _, data, _ = load_learned_ds(order)
@@ -262,7 +252,7 @@ def run_learned_ds_pipeline(
     if simulate:
         visited_pos = simulate_learned_ds(learner, data, order, n_steps=n_steps)
 
-    title = f"Learned {'1st' if order == '1st' else '2nd'}-order DS (straight-line demo)"
+    title = PLOT_TITLE_BY_ORDER[order]
     fig = None
     if simulate and live_plot:
         pos_init = initial_states_for_order(order)

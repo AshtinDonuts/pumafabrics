@@ -40,11 +40,11 @@ class Params:
     state_increment: float = 0.3
 
     save_evaluation: bool = True
-    evaluation_interval: int = 3000
+    evaluation_interval: int = 1500
     quanti_eval: bool = True
-    quali_eval: bool = False
-    diffeo_quanti_eval: bool = False
-    diffeo_quali_eval: bool = False
+    quali_eval: bool = True
+    diffeo_quanti_eval: bool = True  # False
+    diffeo_quali_eval: bool = True  # False
     ignore_n_spurious: bool = False
     fixed_point_iteration_thr = 2
     density: int = 25
