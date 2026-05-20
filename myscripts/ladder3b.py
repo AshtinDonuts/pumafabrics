@@ -49,6 +49,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--steps", type=int, default=2000, help="Simulation steps.")
     parser.add_argument(
+        "--n-simulate",
+        type=int,
+        default=None,
+        help="During training, run ladder grid sim+plot every N iterations (omit to disable).",
+    )
+    parser.add_argument(
         "--no-plot",
         action="store_true",
         help="Skip interactive plot.",
@@ -70,6 +76,7 @@ def main() -> None:
         simulate=not args.train_only,
         force_train=args.force_train,
         max_iterations=args.max_iterations,
+        n_simulate=args.n_simulate,
         n_steps=args.steps,
         live_plot=not args.no_plot,
         save_path=args.save,

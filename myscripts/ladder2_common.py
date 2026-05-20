@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 import re
 import sys
-from typing import Literal
+from typing import Callable, Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -93,6 +93,57 @@ def read_last_training_iteration(results_path: str) -> int | None:
     return last
 
 
+def _periodic_simulate_plot_path(results_path: str, iteration: int) -> str:
+    images_dir = os.path.join(results_path, "images")
+    os.makedirs(images_dir, exist_ok=True)
+    return os.path.join(images_dir, f"ladder_sim_iter_{iteration:06d}.png")
+
+
+def make_periodic_simulate_callback(
+    order: OrderTag,
+    results_path: str,
+    n_steps: int,
+) -> Callable[[int, object, object, dict], None]:
+    """Build a training callback that runs ladder grid sim + static PNG."""
+
+    def callback(iteration: int, learner, _evaluator, data: dict) -> None:
+        demo_xy = load_demonstration_xy()
+        goal = np.asarray(data["goals"][0], dtype=float).reshape(-1)
+        visited = simulate_learned_ds(learner, data, order, n_steps=n_steps)
+        out_path = _periodic_simulate_plot_path(results_path, iteration)
+        title = f"{PLOT_TITLE_BY_ORDER[order]} (iter {iteration})"
+        fig = plot_learned_ds_static(visited, demo_xy, goal, title)
+        fig.savefig(out_path, bbox_inches="tight")
+        plt.close(fig)
+        print(f"Saved ladder simulation plot to {out_path}")
+
+    return callback
+
+
+def _run_training_with_optional_simulate(
+    order: OrderTag,
+    params,
+    params_name: str,
+    *,
+    start_iteration: int = 0,
+    n_simulate: int | None = None,
+    n_steps: int = 2000,
+    verbose: bool = True,
+) -> tuple[object, object, dict, float]:
+    step_callback = None
+    if n_simulate is not None and n_simulate > 0:
+        step_callback = make_periodic_simulate_callback(order, params.results_path, n_steps)
+    return run_training(
+        params,
+        params_name,
+        tensorboard_log_dir=tensorboard_log_dir(params_name, params.selected_primitives_ids),
+        start_iteration=start_iteration,
+        step_callback=step_callback,
+        step_callback_interval=n_simulate,
+        verbose=verbose,
+    )
+
+
 def save_final_checkpoint(learner, ckpt: str, verbose: bool = True) -> None:
     """
     Persist weights after a full training run.
@@ -110,6 +161,8 @@ def train_learned_ds(
     order: OrderTag,
     max_iterations: int | None = None,
     force: bool = False,
+    n_simulate: int | None = None,
+    n_steps: int = 2000,
     verbose: bool = True,
 ) -> tuple[object, object, dict, str]:
     """
@@ -134,13 +187,13 @@ def train_learned_ds(
                     f"{start_iteration} to {params.max_iterations}.",
                 )
             params.load_model = True
-            learner, evaluator, data, _ = run_training(
+            learner, evaluator, data, _ = _run_training_with_optional_simulate(
+                order,
                 params,
                 params_name,
-                tensorboard_log_dir=tensorboard_log_dir(
-                    params_name, params.selected_primitives_ids,
-                ),
                 start_iteration=start_iteration,
+                n_simulate=n_simulate,
+                n_steps=n_steps,
                 verbose=verbose,
             )
             save_final_checkpoint(learner, ckpt, verbose=verbose)
@@ -156,10 +209,12 @@ def train_learned_ds(
             print("Use --force-train to restart from scratch.")
         return load_learned_ds(order, verbose=verbose)
 
-    learner, evaluator, data, _ = run_training(
+    learner, evaluator, data, _ = _run_training_with_optional_simulate(
+        order,
         params,
         params_name,
-        tensorboard_log_dir=tensorboard_log_dir(params_name, params.selected_primitives_ids),
+        n_simulate=n_simulate,
+        n_steps=n_steps,
         verbose=verbose,
     )
     save_final_checkpoint(learner, ckpt, verbose=verbose)
@@ -282,6 +337,7 @@ def run_learned_ds_pipeline(
     simulate: bool = True,
     force_train: bool = False,
     max_iterations: int | None = None,
+    n_simulate: int | None = None,
     n_steps: int = 2000,
     live_plot: bool = True,
     pause_time: float = 1e-5,
@@ -293,6 +349,8 @@ def run_learned_ds_pipeline(
             order,
             max_iterations=max_iterations,
             force=force_train,
+            n_simulate=n_simulate,
+            n_steps=n_steps,
         )
     else:
         learner, _, data, _ = load_learned_ds(order)

@@ -3,7 +3,9 @@ from __future__ import annotations
 import importlib
 import os
 import time
-from typing import Any, List, Optional
+from typing import Any, Callable, List, Optional
+
+TrainingStepCallback = Callable[[int, Any, Any, dict], None]
 
 from simple_parsing import ArgumentParser  # pyright: ignore[reportMissingImports]
 from pumafabrics.puma_adapted.initializer import initialize_framework
@@ -60,6 +62,8 @@ def run_training(
     *,
     tensorboard_log_dir: Optional[str] = None,
     start_iteration: int = 0,
+    step_callback: Optional[TrainingStepCallback] = None,
+    step_callback_interval: Optional[int] = None,
     verbose: bool = True,
 ) -> tuple[Any, Any, dict, float]:
     """
@@ -69,6 +73,10 @@ def run_training(
     ----------
     start_iteration : int
         First iteration index to run (use > 0 with ``params.load_model=True`` to resume).
+    step_callback : callable, optional
+        ``callback(iteration, learner, evaluator, data)`` invoked during training.
+    step_callback_interval : int, optional
+        Call ``step_callback`` when ``iteration % step_callback_interval == 0``.
 
     Returns (learner, evaluator, data, elapsed_seconds).
     """
@@ -112,6 +120,14 @@ def run_training(
 
         for j in range(len(losses_names)):
             writer.add_scalar("losses/" + losses_names[j], loss_list[j], iteration)
+
+        if (
+            step_callback is not None
+            and step_callback_interval is not None
+            and step_callback_interval > 0
+            and iteration % step_callback_interval == 0
+        ):
+            step_callback(iteration, learner, evaluator, data)
 
     elapsed = time.perf_counter() - t0
     writer.close()
