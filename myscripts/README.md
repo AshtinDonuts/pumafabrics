@@ -18,7 +18,7 @@ Here we implement at least the test ladder.
 6. transported analytic DS under uniform scaling;
 	- Status: `Done`
 7. transported analytic DS under non-uniform scaling.
-	- Status: `In-progress`
+	- Status: `Done`
 8. keypoint-transport baseline using the policy-transportation equation
    $\dot{\hat{x}} = J_{\phi}(x)\dot{x}$.
 	- Status: `In-progress`
@@ -189,13 +189,50 @@ ladder 2–4).
 Figures: `myscripts/images/ladder6a_transported_ds.png`,
 `myscripts/images/ladder6b_transported_ds_2nd_order.png`.
 
+### Step 7 — transported DS under non-uniform scaling
+Scripts `ladder7a` (1st order) and `ladder7b` (2nd order) apply a diagonal non-uniform
+scale `y = S x + t` with `S = diag(s_x, s_y)` to a **source** field from any completed
+prior step, then simulate in the target frame via `dy/dt = S f(S^{-1} (y - t))` (and the
+same pushforward for 2nd-order accelerations).
+
+Source options (`--source`):
+
+| Value | Prior step | Requires |
+|-------|------------|----------|
+| `analytic` | Ladder 1 straight-line DS | — |
+| `learned2` | Ladder 2 straight-line demo | checkpoint under `results/ladder2_*` |
+| `learned3` | Ladder 3 heee curved demo | checkpoint under `results/ladder3_*` |
+| `learned4` | Ladder 4 capricorn demo | checkpoint under `results/ladder4_*` |
+
+```bash
+# Analytic source (no training)
+python3 myscripts/ladder7a.py --source analytic --no-plot
+python3 myscripts/ladder7b.py --source analytic --no-plot
+
+# Learned source (train ladders 2–4 first)
+python3 myscripts/ladder7a.py --source learned2 --no-plot
+python3 myscripts/ladder7b.py --source learned4 --scale 1.5 0.75 --translation 0.2 0.1 --no-plot
+```
+
+Default transform: scale `(2.0, 0.5)`, translation `(0, 0)`. Override with
+`--scale SX SY` and `--translation TX TY`. For `analytic` only, set the source attractor
+with `--attractor X Y` (transported goal is `S x* + t`).
+
+Learned sources advance one PUMA ``transition`` per simulation step (``--delta-t``,
+default `0.1`, matching ladders 2–4). Analytic sources use Euler steps with ``--dt``
+(default `0.01`). Use enough ``--steps`` for learned runs (e.g. `2000`–`4000`, as in
+ladder 2–4).
+
+Figures: `myscripts/images/ladder7a_transported_ds.png`,
+`myscripts/images/ladder7b_transported_ds_2nd_order.png`.
+
 ---
 
 
 ## Version Updates:
 
 #### current work: uncommitted
-Ladder ready up till step 6.
+Ladder ready up till step 7.
 
 #### git head: `a36a058`:
 Fixed time-step mismatch.
