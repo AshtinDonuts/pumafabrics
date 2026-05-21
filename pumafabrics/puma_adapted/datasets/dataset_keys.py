@@ -111,8 +111,12 @@ ladder2_line = ['straight_line']
 # Ladder step 3: single curved heee demo (see myscripts/ladder3_data.py)
 ladder3_heee = ['heee']
 
+# Ladder step 4: single self-intersecting capricorn demo (see myscripts/ladder4_data.py)
+ladder4_capricorn = ['capricorn']
+
 dataset_keys_dic = {'LASA': LASA,
                     'LAIR': LAIR,
                     'LASA_S2': LASA_S2,
                     'ladder2_line': ladder2_line,
-                    'ladder3_heee': ladder3_heee}
+                    'ladder3_heee': ladder3_heee,
+                    'ladder4_capricorn': ladder4_capricorn}
