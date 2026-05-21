@@ -21,13 +21,17 @@ Here we implement at least the test ladder.
 	- Status: `Done`
 8. keypoint-transport baseline using the policy-transportation equation
    $\dot{\hat{x}} = J_{\phi}(x)\dot{x}$.
-	- Status: `In-progress`
+	- Status: `Done`
 9. Lyapunov-consistent versus Lyapunov-violating demonstrations.
 	- Status: `In-progress`
 10. local compliant or fabric-mediated execution only after the task-space
    tests pass.
 	* Status: `In-progress`
-    
+
+Extras.
+11. transport from one curve to another
+	- Status: `Done`
+
 
 ### 1st and 2nd order systems
 For each ladder step, we set up 1st and 2nd order systems separately;
@@ -226,13 +230,119 @@ ladder 2–4).
 Figures: `myscripts/images/ladder7a_transported_ds.png`,
 `myscripts/images/ladder7b_transported_ds_2nd_order.png`.
 
+### Step 8 — keypoint policy transport (affine + nonlinear deformation)
+Scripts `ladder8a` (1st order) and `ladder8b` (2nd order) transport a **source** field from
+any completed prior step using the
+[policy_transportation](https://github.com/franzesegiovanni/policy_transportation) residual map
+
+    phi(x) = gamma(x) + psi(gamma(x)),    v_hat = J_phi(x) @ v,
+
+with `J_phi = J_gamma + J_psi @ J_gamma`. The affine part `gamma` is fit from source/target
+keypoints; the nonlinear part `psi` is an RBF residual fit on `target - gamma(source)`.
+Only position (`transport`) and velocity (`transport_velocity`) are transported.
+
+Source options (`--source`):
+
+| Value | Prior step | Requires |
+|-------|------------|----------|
+| `analytic` | Ladder 1 straight-line DS | — |
+| `learned2` | Ladder 2 straight-line demo | checkpoint under `results/ladder2_*` |
+| `learned3` | Ladder 3 heee curved demo | checkpoint under `results/ladder3_*` |
+| `learned4` | Ladder 4 capricorn demo | checkpoint under `results/ladder4_*` |
+
+```bash
+# Analytic source (no training)
+python3 myscripts/ladder8a.py --source analytic --no-plot
+python3 myscripts/ladder8b.py --source analytic --no-plot
+
+# Learned source (train ladders 2–4 first)
+python3 myscripts/ladder8a.py --source learned2 --no-plot
+python3 myscripts/ladder8b.py --source learned4 --deform-amplitude 0.1 --no-plot
+```
+
+CLI warp parameters define a **generative** target keypoint distribution used to fit
+`PolicyTransportation`; defaults: translation `(0.5, 0.3)`, rotation `25°`, scale `1.2`,
+deform amplitude `0.15`, frequencies `(1.3, 1.7)`, seed `0`. Override with
+`--translation`, `--rotation-deg`, `--scale`, `--deform-amplitude`, `--deform-freq`,
+`--deform-seed`, and `--no-affine-scale` / `--no-affine-rotation` for the affine fit.
+For `analytic` only, set the source attractor with `--attractor X Y`.
+
+Learned sources advance one PUMA ``transition`` per simulation step (``--delta-t``,
+default `0.1`). Analytic sources use Euler steps with ``--dt`` (default `0.01`).
+
+Figures: `myscripts/images/ladder8a_policy_transport_ds.png`,
+`myscripts/images/ladder8b_policy_transport_ds_2nd_order.png`.
+
+### Step 11 — transport from source DS to a real demo curve (LASA / LAIR)
+Scripts `ladder11a` (1st order) and `ladder11b` (2nd order) fit a `PolicyTransportation2D`
+map **directly from data**: source keypoints come from the source system's demonstration
+(or a synthetic straight-line for `analytic`), and target keypoints are resampled from a
+real demonstration chosen from the LASA or LAIR datasets.
+
+The map is residual:
+
+    phi(x) = gamma(x) + psi(gamma(x)),    v_hat = J_phi(x) @ v
+
+`gamma` is an affine Procrustes fit; `psi` is a Gaussian-RBF interpolant fit to
+`target - gamma(source)`.  A Newton-based inverse (affine warm start) is used to
+map initial states from target to source frame.
+
+Source options (`--source`): same as steps 5–8.
+
+Target options:
+
+| `--target-dataset` | `--target-name` examples |
+|--------------------|--------------------------|
+| `lasa` | `heee` `CShape` `Sine` `Snake` `Worm` `Sshape` `GShape` ... |
+| `lair` | `capricorn` `e` `mountain` `phi` `double_loop` `two` ... |
+
+```bash
+# Analytic source → LASA heee (default)
+python3 myscripts/ladder11a.py --source analytic --no-plot
+python3 myscripts/ladder11b.py --source analytic --no-plot
+
+# Analytic source → LASA CShape
+python3 myscripts/ladder11a.py --source analytic --target-dataset lasa --target-name CShape --no-plot
+
+# Analytic source → LAIR capricorn
+python3 myscripts/ladder11a.py --source analytic --target-dataset lair --target-name capricorn --no-plot
+
+# Learned source (train ladder 3 first) → LASA Sine
+python3 myscripts/ladder11a.py --source learned3 --target-dataset lasa --target-name Sine --no-plot
+
+# Learned source → LAIR mountain, finer resampling, explicit RBF bandwidth
+python3 myscripts/ladder11b.py --source learned4 --target-dataset lair --target-name mountain \
+    --n-keypoints 60 --rbf-bandwidth 0.2 --no-plot
+
+# Disable affine scale/rotation (translation-only affine part)
+python3 myscripts/ladder11a.py --no-affine-scale --no-affine-rotation --no-plot
+```
+
+Key CLI parameters beyond `--source`:
+
+| Flag | Default | Meaning |
+|------|---------|---------|
+| `--target-dataset` | `lasa` | Dataset family: `lasa` or `lair` |
+| `--target-name` | `heee` | Dataset name within the family |
+| `--target-demo` | `0` | Demo / episode index |
+| `--n-keypoints` | `40` | Points to resample both curves to before fitting |
+| `--grid-nx` / `--grid-ny` | `4` / `3` | Initial-state grid inside **target** demo bbox (12 points) |
+| `--grid-margin` | `0.12` | Inset inside target bbox (same idea as ladder 3) |
+| `--rbf-bandwidth` | auto | Gaussian RBF bandwidth h (default: median heuristic) |
+| `--rbf-reg` | `1e-6` | Tikhonov regularisation for the RBF linear solve |
+| `--no-affine-scale` | — | Disable scale in affine part |
+| `--no-affine-rotation` | — | Disable rotation in affine part |
+
+Figures: `myscripts/images/ladder11a_demo_transport_ds.png`,
+`myscripts/images/ladder11b_demo_transport_ds_2nd_order.png`.
+
 ---
 
 
 ## Version Updates:
 
 #### current work: uncommitted
-Ladder ready up till step 7.
+Ladder ready up till step 8, plus extra step 11 (demo-to-demo transport).
 
 #### git head: `a36a058`:
 Fixed time-step mismatch.
