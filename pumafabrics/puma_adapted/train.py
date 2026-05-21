@@ -125,7 +125,10 @@ def run_training(
             step_callback is not None
             and step_callback_interval is not None
             and step_callback_interval > 0
-            and iteration % step_callback_interval == 0
+            and (
+                iteration % step_callback_interval == 0
+                or iteration == params.max_iterations
+            )
         ):
             step_callback(iteration, learner, evaluator, data)
 

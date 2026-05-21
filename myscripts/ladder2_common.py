@@ -93,6 +93,15 @@ def read_last_training_iteration(results_path: str) -> int | None:
     return last
 
 
+def resolve_n_simulate(n_simulate: int | None, params) -> int | None:
+    """See ``ladder3_common.resolve_n_simulate``."""
+    if n_simulate is None:
+        return int(params.evaluation_interval)
+    if n_simulate <= 0:
+        return None
+    return n_simulate
+
+
 def _periodic_simulate_plot_path(results_path: str, iteration: int) -> str:
     images_dir = os.path.join(results_path, "images")
     os.makedirs(images_dir, exist_ok=True)
@@ -107,15 +116,25 @@ def make_periodic_simulate_callback(
     """Build a training callback that runs ladder grid sim + static PNG."""
 
     def callback(iteration: int, learner, _evaluator, data: dict) -> None:
-        demo_xy = load_demonstration_xy()
-        goal = np.asarray(data["goals"][0], dtype=float).reshape(-1)
-        visited = simulate_learned_ds(learner, data, order, n_steps=n_steps)
         out_path = _periodic_simulate_plot_path(results_path, iteration)
-        title = f"{PLOT_TITLE_BY_ORDER[order]} (iter {iteration})"
-        fig = plot_learned_ds_static(visited, demo_xy, goal, title)
-        fig.savefig(out_path, bbox_inches="tight")
-        plt.close(fig)
-        print(f"Saved ladder simulation plot to {out_path}")
+        print(f"Ladder grid simulation at iteration {iteration} -> {out_path}")
+        was_training = learner.model.training
+        learner.model.eval()
+        try:
+            demo_xy = load_demonstration_xy()
+            goal = np.asarray(data["goals"][0], dtype=float).reshape(-1)
+            with torch.no_grad():
+                visited = simulate_learned_ds(learner, data, order, n_steps=n_steps)
+            title = f"{PLOT_TITLE_BY_ORDER[order]} (iter {iteration})"
+            fig = plot_learned_ds_static(visited, demo_xy, goal, title)
+            fig.savefig(out_path, bbox_inches="tight", dpi=120)
+            plt.close(fig)
+            print(f"Saved ladder simulation plot to {out_path}")
+        except Exception:
+            plt.close("all")
+            raise
+        finally:
+            learner.model.train(was_training)
 
     return callback
 
@@ -130,8 +149,11 @@ def _run_training_with_optional_simulate(
     n_steps: int = 2000,
     verbose: bool = True,
 ) -> tuple[object, object, dict, float]:
+    interval = resolve_n_simulate(n_simulate, params)
     step_callback = None
-    if n_simulate is not None and n_simulate > 0:
+    if interval is not None:
+        if verbose:
+            print(f"Ladder grid plots every {interval} training iterations.")
         step_callback = make_periodic_simulate_callback(order, params.results_path, n_steps)
     return run_training(
         params,
@@ -139,7 +161,7 @@ def _run_training_with_optional_simulate(
         tensorboard_log_dir=tensorboard_log_dir(params_name, params.selected_primitives_ids),
         start_iteration=start_iteration,
         step_callback=step_callback,
-        step_callback_interval=n_simulate,
+        step_callback_interval=interval,
         verbose=verbose,
     )
 

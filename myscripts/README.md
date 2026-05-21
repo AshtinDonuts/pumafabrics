@@ -55,9 +55,10 @@ python3 myscripts/ladder3_data.py
 python3 myscripts/ladder3a.py --no-plot
 python3 myscripts/ladder3b.py --no-plot
 
-# During training, also save ladder grid sim plots every N iterations
-python3 myscripts/ladder3b.py --n-simulate 3000 --train-only --no-plot
+# During training, ladder grid PNGs (default: every 1500 iters, same as evaluator PDFs)
 # -> results/ladder3_2nd_order_2D/ladder3_heee/0/images/ladder_sim_iter_*.png
+python3 myscripts/ladder3b.py --train-only --no-plot
+# Custom interval or disable: --n-simulate 3000  |  --n-simulate 0
 
 # Re-simulate an existing checkpoint
 python3 myscripts/ladder3a.py --simulate-only --no-plot

@@ -52,7 +52,8 @@ def parse_args() -> argparse.Namespace:
         "--n-simulate",
         type=int,
         default=None,
-        help="During training, run ladder grid sim+plot every N iterations (omit to disable).",
+        help="Ladder grid PNG every N iters while training (default: evaluation_interval, 1500). "
+        "Use 0 to disable.",
     )
     parser.add_argument(
         "--no-plot",
